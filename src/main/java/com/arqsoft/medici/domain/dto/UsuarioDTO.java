@@ -3,10 +3,19 @@ package com.arqsoft.medici.domain.dto;
 
 public class UsuarioDTO {
 
-	
 	private String nombre;
 	private String apellido;
 	private String mail;
+	
+	public UsuarioDTO(String nombre, String apellido, String mail) {
+		super();
+		this.nombre = nombre;
+		this.apellido = apellido;
+		this.mail = mail;
+	}
+	
+	public UsuarioDTO() {}
+	
 	
 	public String getNombre() {
 		return nombre;

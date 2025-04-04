@@ -2,7 +2,6 @@ package com.arqsoft.medici.application;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Usuario;
 import com.arqsoft.medici.domain.dto.UsuarioDTO;
@@ -13,7 +12,6 @@ import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
 import com.arqsoft.medici.domain.utils.FormatUtils;
 import com.arqsoft.medici.domain.utils.UsuarioEstado;
 import com.arqsoft.medici.infrastructure.persistence.UsuarioRepository;
-
 import io.micrometer.common.util.StringUtils;
 
 @Service
