@@ -87,6 +87,9 @@ public class UsuarioController {
 			} catch (UsuarioNoEncontradoException e) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se encontro el usuario "+mail+".", e);
 
+			} catch (Exception e) {
+				throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
+				
 			}
     }
 	

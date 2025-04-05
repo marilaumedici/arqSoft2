@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,14 +14,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.arqsoft.medici.domain.Usuario;
 import com.arqsoft.medici.domain.dto.UsuarioDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.UsuarioExistenteException;
-import com.arqsoft.medici.domain.utils.FormatUtils;
 import com.arqsoft.medici.domain.utils.UsuarioEstado;
 import com.arqsoft.medici.infrastructure.persistence.UsuarioRepository;
 
@@ -38,10 +35,10 @@ public class UsuarioServiceTest {
 	@Captor
 	private ArgumentCaptor<Usuario> usuarioCaptor;
 	
-	private String emailIvalido    = "agussusu";
-	private String email    = "agussusu@gmal.com";
-	private String nombre   = "Agustin";
-	private String apellido = "Delpane";
+	private String emailIvalido     = "agussusu";
+	private String email    		= "agussusu@gmal.com";
+	private String nombre   		= "Agustin";
+	private String apellido 		= "Delpane";
 	
 	@Test
 	public void testCrearUsuarioInexistenteOK() throws UsuarioExistenteException, InternalErrorException, FormatoEmailInvalidoException {
