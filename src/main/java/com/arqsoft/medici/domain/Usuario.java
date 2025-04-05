@@ -25,6 +25,14 @@ public class Usuario {
 		this.estado = UsuarioEstado.ACTIVO;
 	}
 	
+	public Usuario(String nombre, String apellido, String mail, UsuarioEstado estado) {
+		super();
+		this.nombre = nombre;
+		this.apellido = apellido;
+		this.mail = mail;
+		this.estado = estado;
+	}
+	
 	
 	public String getNombre() {
 		return nombre;
