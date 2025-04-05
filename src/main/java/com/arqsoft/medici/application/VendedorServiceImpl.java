@@ -49,8 +49,11 @@ public class VendedorServiceImpl implements VendedorService {
 
 
 	private void actualizarDatosVendedor(VendedorDTO request, Vendedor vendedor) {
-		// TODO Auto-generated method stub
-		
+		if(StringUtils.isNotBlank(request.getRazonSocial())) {
+			vendedor.setRazonSocial(request.getRazonSocial());
+		}
+
+		vendedorRepository.save(vendedor);
 	}
 
 
