@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.arqsoft.medici.domain.Vendedor;
 import com.arqsoft.medici.domain.dto.VendedorDTO;
+import com.arqsoft.medici.domain.dto.VendedorDatosDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
@@ -46,7 +47,39 @@ public class VendedorServiceImpl implements VendedorService {
 
 		}	
 	}
+	
+	@Override
+	public Vendedor obtenerVendedorByMail(String mailVendedor) {
+		
+		Optional<Vendedor> vendedorOpcional = vendedorRepository.findById(mailVendedor);
+		
+		Vendedor vendedor = vendedorOpcional.get();
+		
+		return vendedor;
+	}
 
+	@Override
+	public void actualizarVendedor(Vendedor vendedor) {
+		
+		vendedorRepository.save(vendedor);
+		
+	}
+	
+	@Override
+	public VendedorDatosDTO obtenerVendedor(String mail) {
+	
+		Optional<Vendedor> opcionalVendedor = vendedorRepository.findById(mail);
+		
+		Vendedor vendedor = opcionalVendedor.get();
+		
+		VendedorDatosDTO dto = new VendedorDatosDTO();
+		dto.setEstado(vendedor.getEstado());
+		dto.setMail(vendedor.getMail());
+		dto.setRazonSocial(vendedor.getRazonSocial());
+		
+		
+		return null;
+	}
 
 	private void actualizarDatosVendedor(VendedorDTO request, Vendedor vendedor) {
 		if(StringUtils.isNotBlank(request.getRazonSocial())) {
