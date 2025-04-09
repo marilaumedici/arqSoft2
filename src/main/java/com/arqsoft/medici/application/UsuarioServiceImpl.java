@@ -72,7 +72,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 	public void eliminarUsuario(String mail) throws InternalErrorException, UsuarioNoEncontradoException {
 		
 		if(StringUtils.isBlank(mail)) {
-			throw new InternalErrorException("El path mail no debe viajar vacio");
+			throw new InternalErrorException("El mail no debe viajar vacio");
 		}
 		
 		Optional<Usuario> usuarioOpcional = usuarioRepository.findById(mail);

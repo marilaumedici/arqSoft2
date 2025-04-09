@@ -75,7 +75,7 @@ public class UsuarioController {
     @DeleteMapping(path = "/{email}", 
     //consumes = MediaType.APPLICATION_JSON_VALUE, 
     produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "borra_usuario", value = "Borra un usuario logicamente")
+    @ApiOperation(nickname = "borrar_usuario", value = "Borra un usuario logicamente")
 	public void eliminarUsuario(@PathVariable(value = "email") String mail) {
     	
 			try {

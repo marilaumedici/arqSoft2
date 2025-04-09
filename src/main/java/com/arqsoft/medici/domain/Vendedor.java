@@ -12,7 +12,7 @@ public class Vendedor {
 	private String mail;
 	private String razonSocial;
 	private VendedorEstado estado;
-	@DBRef(lazy = true) 
+	@DBRef//(lazy = true) 
 	private List<Producto> productosListados = new ArrayList<Producto>();
 	
 	public Vendedor(String mail, String razonSocial) {

@@ -1,17 +1,21 @@
 package com.arqsoft.medici.application;
 
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.arqsoft.medici.domain.Producto;
+import com.arqsoft.medici.domain.Usuario;
 import com.arqsoft.medici.domain.Vendedor;
+import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.dto.VendedorDTO;
 import com.arqsoft.medici.domain.dto.VendedorDatosDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
+import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
+import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.utils.FormatUtils;
+import com.arqsoft.medici.domain.utils.UsuarioEstado;
 import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.persistence.VendedorRepository;
 import io.micrometer.common.util.StringUtils;
@@ -49,13 +53,46 @@ public class VendedorServiceImpl implements VendedorService {
 	}
 	
 	@Override
-	public Vendedor obtenerVendedorByMail(String mailVendedor) {
+	public void modificarVendedor(VendedorDTO request) throws InternalErrorException, VendedorNoEncontradoException {
 		
-		Optional<Vendedor> vendedorOpcional = vendedorRepository.findById(mailVendedor);
+		if(StringUtils.isBlank(request.getMail())) {
+			throw new InternalErrorException("El campo mail no debe viajar vacio");
+		}
 		
-		Vendedor vendedor = vendedorOpcional.get();
+		Optional<Vendedor> vendedorOpcional = vendedorRepository.findById(request.getMail());
 		
-		return vendedor;
+		if (vendedorOpcional.isPresent()) {
+			if(vendedorOpcional.get().getEstado().equals(VendedorEstado.BORRADO)) {
+				throw new VendedorNoEncontradoException();
+				
+			}
+			Vendedor vendedor = vendedorOpcional.get();
+		    actualizarDatosVendedor(request, vendedor);
+		    
+		} else {
+		    throw new VendedorNoEncontradoException();
+		}
+	}
+	
+	
+	@Override
+	public void eliminarVendedor(String mail) throws InternalErrorException, VendedorNoEncontradoException {
+		
+		if(StringUtils.isBlank(mail)) {
+			throw new InternalErrorException("El mail no debe viajar vacio");
+		}
+		
+		Optional<Vendedor> vendedorOpcional = vendedorRepository.findById(mail);
+		
+		if (vendedorOpcional.isPresent()) {
+			Vendedor vendedor = vendedorOpcional.get();
+			vendedor.setEstado(VendedorEstado.BORRADO);
+			vendedorRepository.save(vendedor);
+			
+		} else {
+		    throw new VendedorNoEncontradoException();
+		}
+		
 	}
 
 	@Override
@@ -63,6 +100,16 @@ public class VendedorServiceImpl implements VendedorService {
 		
 		vendedorRepository.save(vendedor);
 		
+	}
+	
+	@Override
+	public Vendedor obtenerVendedorByMail(String mailVendedor) {
+		
+		Optional<Vendedor> vendedorOpcional = vendedorRepository.findById(mailVendedor);
+		
+		Vendedor vendedor = vendedorOpcional.get();
+		
+		return vendedor;
 	}
 	
 	@Override
@@ -76,12 +123,16 @@ public class VendedorServiceImpl implements VendedorService {
 		dto.setEstado(vendedor.getEstado());
 		dto.setMail(vendedor.getMail());
 		dto.setRazonSocial(vendedor.getRazonSocial());
+		for(Producto p : vendedor.getProductosListados()) {
+			ProductoDTO pdto = new ProductoDTO(p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(), vendedor.getMail());
+			dto.getProductosListados().add(pdto);
+		}
 		
-		
-		return null;
+		return dto;
 	}
 
 	private void actualizarDatosVendedor(VendedorDTO request, Vendedor vendedor) {
+
 		if(StringUtils.isNotBlank(request.getRazonSocial())) {
 			vendedor.setRazonSocial(request.getRazonSocial());
 		}

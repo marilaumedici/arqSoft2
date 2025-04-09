@@ -11,6 +11,20 @@ public class ProductoDTO {
 	private ProductoCategoria categoria;
 	private String mailVendedor;
 	
+	
+	public ProductoDTO(String nombre, String descripcion, double precio, int stock, ProductoCategoria categoria,
+			String mailVendedor) {
+		super();
+		this.nombre = nombre;
+		this.descripcion = descripcion;
+		this.precio = precio;
+		this.stock = stock;
+		this.categoria = categoria;
+		this.mailVendedor = mailVendedor;
+	}
+	
+	public ProductoDTO() {}
+	
 	public String getNombre() {
 		return nombre;
 	}
