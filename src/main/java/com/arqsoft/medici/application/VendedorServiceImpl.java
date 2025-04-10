@@ -4,18 +4,15 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Producto;
-import com.arqsoft.medici.domain.Usuario;
 import com.arqsoft.medici.domain.Vendedor;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.dto.VendedorDTO;
 import com.arqsoft.medici.domain.dto.VendedorDatosDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
-import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.utils.FormatUtils;
-import com.arqsoft.medici.domain.utils.UsuarioEstado;
 import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.persistence.VendedorRepository;
 import io.micrometer.common.util.StringUtils;
@@ -45,6 +42,7 @@ public class VendedorServiceImpl implements VendedorService {
 				Vendedor vendedor = vendedorOpcional.get();
 				vendedor.setEstado(VendedorEstado.ACTIVO);
 				actualizarDatosVendedor(request, vendedor);
+				
 			}
 		}else {
 			vendedorRepository.insert(new Vendedor(request.getMail(), request.getRazonSocial()));
@@ -61,16 +59,13 @@ public class VendedorServiceImpl implements VendedorService {
 		
 		Optional<Vendedor> vendedorOpcional = vendedorRepository.findById(request.getMail());
 		
-		if (vendedorOpcional.isPresent()) {
-			if(vendedorOpcional.get().getEstado().equals(VendedorEstado.BORRADO)) {
-				throw new VendedorNoEncontradoException();
-				
-			}
+		if(vendedorExiste(vendedorOpcional)) {
 			Vendedor vendedor = vendedorOpcional.get();
 		    actualizarDatosVendedor(request, vendedor);
 		    
-		} else {
-		    throw new VendedorNoEncontradoException();
+		}else {
+			 throw new VendedorNoEncontradoException();
+			 
 		}
 	}
 	
@@ -94,22 +89,30 @@ public class VendedorServiceImpl implements VendedorService {
 		}
 		
 	}
-
+	
+	@Override
+	public Vendedor obtenerVendedorEntidad(String mailVendedor) throws InternalErrorException, VendedorNoEncontradoException {
+		
+		if(StringUtils.isBlank(mailVendedor)) {
+			throw new InternalErrorException("El mail no debe viajar vacio");
+		}
+		
+		Optional<Vendedor> vendedorOpcional = vendedorRepository.findById(mailVendedor);
+		
+		if(vendedorExiste(vendedorOpcional)) {
+			return vendedorOpcional.get();
+			
+		}else {
+			throw new VendedorNoEncontradoException();
+			
+		}
+	}
+	
 	@Override
 	public void actualizarVendedor(Vendedor vendedor) {
 		
 		vendedorRepository.save(vendedor);
 		
-	}
-	
-	@Override
-	public Vendedor obtenerVendedorByMail(String mailVendedor) {
-		
-		Optional<Vendedor> vendedorOpcional = vendedorRepository.findById(mailVendedor);
-		
-		Vendedor vendedor = vendedorOpcional.get();
-		
-		return vendedor;
 	}
 	
 	@Override
@@ -138,6 +141,12 @@ public class VendedorServiceImpl implements VendedorService {
 		}
 
 		vendedorRepository.save(vendedor);
+	}
+	
+	private boolean vendedorExiste(Optional<Vendedor> vendedorOpcional) {
+		
+		return vendedorOpcional.isPresent() && vendedorOpcional.get().getEstado().equals(VendedorEstado.ACTIVO);
+		
 	}
 
 

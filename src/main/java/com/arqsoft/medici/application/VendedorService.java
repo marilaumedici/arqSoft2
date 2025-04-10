@@ -16,7 +16,7 @@ public interface VendedorService {
 	
 	void eliminarVendedor(String mail) throws InternalErrorException, VendedorNoEncontradoException;
 	
-	Vendedor obtenerVendedorByMail(String mailVendedor);
+	Vendedor obtenerVendedorEntidad(String mailVendedor) throws InternalErrorException, VendedorNoEncontradoException;
 
 	void actualizarVendedor(Vendedor vendedor);
 

@@ -29,7 +29,7 @@ public class Producto {
 		this.precio = precio;
 		this.stock = stock;
 		this.categoria = categoria;
-		this.estado = ProductoEstado.ACTIVO;
+		this.estado = ProductoEstado.DISPONIBLE;
 	}
 	
 	public String getProductoId() {

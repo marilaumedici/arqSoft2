@@ -91,6 +91,9 @@ public class VendedorController {
 			} catch (VendedorNoEncontradoException e) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se encontro el vendedor "+mail+".", e);
 
+			} catch (Exception e) {
+				throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
+				
 			}
     }
 	
