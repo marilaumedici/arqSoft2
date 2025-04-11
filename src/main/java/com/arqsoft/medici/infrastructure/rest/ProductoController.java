@@ -3,7 +3,9 @@ package com.arqsoft.medici.infrastructure.rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.arqsoft.medici.application.ProductoService;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
+import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import io.swagger.annotations.ApiOperation;
@@ -45,8 +48,30 @@ public class ProductoController {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
 			
 		}
-    	
     }
+    
+    @PutMapping(path = "/{productoId}", 
+    consumes = MediaType.APPLICATION_JSON_VALUE, 
+    produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(nickname = "modificar_producto", value = "Modifica los datos de un producto")
+	public void modificarProducto(@PathVariable(value = "productoId") String id, @RequestBody ProductoDTO request) {
+    	
+    	try {
+    		
+			productoService.modificarProducto(id,request);
+			
+		} catch (InternalErrorException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+
+		} catch (ProductoInexistenteException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
+
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
+			
+		}
+    }
+    
 
 	public ProductoService getProductoService() {
 		return productoService;
