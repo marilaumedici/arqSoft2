@@ -12,4 +12,6 @@ public interface ProductoService {
 
 	public void modificarProducto(String id, ProductoDTO request) throws InternalErrorException, ProductoInexistenteException;
 
+	public void eliminarProducto(String id, String mail) throws InternalErrorException, ProductoInexistenteException;
+
 }
