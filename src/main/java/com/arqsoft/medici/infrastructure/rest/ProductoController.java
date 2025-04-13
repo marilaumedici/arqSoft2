@@ -1,18 +1,23 @@
 package com.arqsoft.medici.infrastructure.rest;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.arqsoft.medici.application.ProductoService;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
+import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
+import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
@@ -30,11 +35,12 @@ public class ProductoController {
     consumes = MediaType.APPLICATION_JSON_VALUE, 
     produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(nickname = "crear_producto", value = "Crea un producto")
-	public void crearProducto(@RequestBody ProductoDTO request) {
+	public ProductoResponseDTO crearProducto(@RequestBody ProductoDTO request) {
     	
     	try {
     		
-			productoService.crearProducto(request);
+    		ProductoResponseDTO response = productoService.crearProducto(request);
+			return response;
 			
 		} catch (InternalErrorException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -45,6 +51,9 @@ public class ProductoController {
 		} catch (ValidacionException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
 			
+		} catch (ProductoInexistenteException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
+
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
 			
@@ -93,6 +102,28 @@ public class ProductoController {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
 			
 		}
+    }
+    
+    @GetMapping(path = "/{mailVendedor}", 
+    //consumes = MediaType.APPLICATION_JSON_VALUE, 
+    produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(nickname = "get_productos_vendedor", value = "Obtiene los productos de un vendedor")
+	public ProductosVendedorDTO obtenerProductosVendedor(@PathVariable(value = "mailVendedor") String mail, @RequestParam(name = "pagina", defaultValue = "0")  Integer page, @RequestParam(name = "size", defaultValue = "999")  Integer elementos) {
+    	
+    	ProductosVendedorDTO response = null;
+		try {
+			
+			response = productoService.obtenerProductosVendedor(mail, page, elementos);
+			
+		} catch (InternalErrorException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
+			
+		}
+    	
+    	return response;
     }
     
 

@@ -9,7 +9,7 @@ public class VendedorDatosDTO {
 	private String mail;
 	private String razonSocial;
 	private VendedorEstado estado;
-	private List<ProductoDTO> productosListados = new ArrayList<ProductoDTO>();
+	private List<ProductoResponseDTO> productosListados = new ArrayList<ProductoResponseDTO>();
 	
 	public String getMail() {
 		return mail;
@@ -29,10 +29,10 @@ public class VendedorDatosDTO {
 	public void setEstado(VendedorEstado estado) {
 		this.estado = estado;
 	}
-	public List<ProductoDTO> getProductosListados() {
+	public List<ProductoResponseDTO> getProductosListados() {
 		return productosListados;
 	}
-	public void setProductosListados(List<ProductoDTO> productosListados) {
+	public void setProductosListados(List<ProductoResponseDTO> productosListados) {
 		this.productosListados = productosListados;
 	}
 

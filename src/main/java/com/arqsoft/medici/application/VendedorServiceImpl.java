@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
+import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
 import com.arqsoft.medici.domain.dto.VendedorDTO;
 import com.arqsoft.medici.domain.dto.VendedorDatosDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
@@ -127,8 +128,8 @@ public class VendedorServiceImpl implements VendedorService {
 		dto.setMail(vendedor.getMail());
 		dto.setRazonSocial(vendedor.getRazonSocial());
 		for(Producto p : vendedor.getProductosListados()) {
-			ProductoDTO pdto = new ProductoDTO(p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(), vendedor.getMail());
-			dto.getProductosListados().add(pdto);
+	    	ProductoResponseDTO pDTO = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
+			dto.getProductosListados().add(pDTO);
 		}
 		
 		return dto;

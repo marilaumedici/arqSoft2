@@ -1,20 +1,25 @@
 package com.arqsoft.medici.application;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
+import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
+import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
 import com.arqsoft.medici.infrastructure.persistence.ProductoRepository;
-
 import io.micrometer.common.util.StringUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
 @Service
 public class ProductoServiceImpl implements ProductoService {
@@ -26,20 +31,55 @@ public class ProductoServiceImpl implements ProductoService {
 	private VendedorService vendedorService;
 	
 	@Override
-	public void crearProducto(ProductoDTO request) throws InternalErrorException, VendedorNoEncontradoException, ValidacionException {
+	public ProductoResponseDTO crearProducto(ProductoDTO request) throws InternalErrorException, VendedorNoEncontradoException, ValidacionException, ProductoInexistenteException {
 		
-		validarDatosCreacionProducto(request);
+		if(StringUtils.isBlank(request.getMailVendedor())) {
+			throw new InternalErrorException("El mail del vendedor no puede estar vacio.");
+			
+		}
 		
-		Producto producto = new Producto(request.getNombre(), request.getDescripcion(), request.getPrecio(), request.getStock(), request.getCategoria());
+		ProductoResponseDTO response = null;
 		
-		Vendedor vendedor = vendedorService.obtenerVendedorEntidad(request.getMailVendedor());
-		producto.setVendedor(vendedor);
+		if(StringUtils.isNotBlank(request.getCodigoProducto())) {
+			
+			Optional<Producto> opcionalProducto = productoRepository.findById(request.getCodigoProducto());
+			
+			if(opcionalProducto.isEmpty()) {
+				throw new ProductoInexistenteException();
+				
+			}
+			
+			Producto producto = opcionalProducto.get();
+			
+			if(producto.getEstado().equals(ProductoEstado.NO_DISPONIBLE)) {
+				producto.setEstado(ProductoEstado.DISPONIBLE);
+				
+			}
+						
+			if(actualizarDatosProducto(request, producto)) {
+				Producto p = productoRepository.save(producto);
+				response = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(), p.getEstado(), p.getVendedor().getMail());
+				
+			}
+		}else {
+			
+			validarDatosCreacionProducto(request);
+			
+			Producto producto = new Producto(request.getNombre(), request.getDescripcion(), request.getPrecio(), request.getStock(), request.getCategoria());
+			
+			Vendedor vendedor = vendedorService.obtenerVendedorEntidad(request.getMailVendedor());
+			producto.setVendedor(vendedor);
+			
+			Producto p = productoRepository.insert(producto);
+			
+			vendedor.getProductosListados().add(producto);
+			vendedorService.actualizarVendedor(vendedor);
+			
+			response = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
+
+		}
 		
-		productoRepository.insert(producto);
-		
-		vendedor.getProductosListados().add(producto);
-		vendedorService.actualizarVendedor(vendedor);
-		
+		return response;
 	}
 	
 	@Override
@@ -59,8 +99,6 @@ public class ProductoServiceImpl implements ProductoService {
 		if(existeProducto(opcionalProducto)) {
 			
 			Producto producto = opcionalProducto.get();
-
-			validarProductoMismoVendedor(producto.getVendedor().getMail(), request.getMailVendedor(), "Un vendedor no puede modificar el producto de otro vendedor.");
 
 			if(actualizarDatosProducto(request, producto)) {
 				productoRepository.save(producto);
@@ -102,6 +140,27 @@ public class ProductoServiceImpl implements ProductoService {
 		}
 	}
 	
+	@Override
+	public ProductosVendedorDTO obtenerProductosVendedor(String mailVendedor, Integer pagina, Integer size) throws InternalErrorException {
+		
+		if(StringUtils.isBlank(mailVendedor)) {
+			throw new InternalErrorException("El mail del vendedor no puede estar vacio.");
+			
+		}
+
+		List<ProductoResponseDTO> response = new ArrayList<ProductoResponseDTO>();
+		Pageable pageable = PageRequest.of(pagina, size);
+	    //Page<Producto> productosPage = productoRepository.findAll(pageable);
+	    Page<Producto> productosPage = productoRepository.findByVendedor_Mail(mailVendedor, pageable);
+	    List<Producto> productos = productosPage.getContent();
+	    
+	    for(Producto p : productos) {
+	    	ProductoResponseDTO pDTO = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
+	    	response.add(pDTO);
+	    }
+	    return new ProductosVendedorDTO(productosPage.getNumber(), productosPage.getTotalPages(), productosPage.getTotalElements(), response);
+	}
+	
 	private void validarProductoMismoVendedor(String mailVendedorProducto, String mailVendedorIngresado, String mensaje) throws InternalErrorException {
 		
 		if(! mailVendedorProducto.equals(mailVendedorIngresado)) {
@@ -116,7 +175,18 @@ public class ProductoServiceImpl implements ProductoService {
 		
 	}
 	
-	private boolean actualizarDatosProducto(ProductoDTO request, Producto producto) {
+	/**
+	 * Metodo que actualiza los datos del ente producto con los que hay en el dto y devuelve un booleano para indicar si se actualizo algun atrubuto.
+	 * De tener mail vendedores distintos el ente y el dto, dara error.
+	 * @param request
+	 * @param producto
+	 * @return Si actualizo algun campo para actualizar del ente
+	 * @throws InternalErrorException
+	 */
+	private boolean actualizarDatosProducto(ProductoDTO request, Producto producto) throws InternalErrorException {
+		
+		validarProductoMismoVendedor(producto.getVendedor().getMail(), request.getMailVendedor(), "Un vendedor no puede modificar el producto de otro vendedor.");
+
 		boolean cambio = false;
 		
 		if(StringUtils.isNotBlank(request.getNombre())) {
@@ -166,10 +236,6 @@ public class ProductoServiceImpl implements ProductoService {
 		}
 		if(StringUtils.isBlank(String.valueOf(request.getCategoria()))) {
 			throw new ValidacionException("Debe ingresar una categoria para el producto.");
-			
-		}
-		if(StringUtils.isBlank(request.getMailVendedor())) {
-			throw new InternalErrorException("El mail del vendedor no puede estar vacio.");
 			
 		}
 	}

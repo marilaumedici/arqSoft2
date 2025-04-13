@@ -1,8 +1,9 @@
 package com.arqsoft.medici.domain.dto;
 
 import com.arqsoft.medici.domain.utils.ProductoCategoria;
+import com.arqsoft.medici.domain.utils.ProductoEstado;
 
-public class ProductoDTO {
+public class ProductoResponseDTO {
 	
 	private String codigoProducto;
 	private String nombre;
@@ -11,20 +12,30 @@ public class ProductoDTO {
 	private int stock;
 	private ProductoCategoria categoria;
 	private String mailVendedor;
+	private ProductoEstado estado;
 	
 	
-	public ProductoDTO(String nombre, String descripcion, double precio, int stock, ProductoCategoria categoria, String mailVendedor) {
+	public ProductoResponseDTO(String id, String nombre, String descripcion, double precio, int stock, ProductoCategoria categoria, ProductoEstado estado, String mailVendedor) {
 		super();
+		this.codigoProducto = id;
 		this.nombre = nombre;
 		this.descripcion = descripcion;
 		this.precio = precio;
 		this.stock = stock;
 		this.categoria = categoria;
 		this.mailVendedor = mailVendedor;
+		this.estado = estado;
 	}
 	
-	public ProductoDTO() {}
+	public ProductoResponseDTO() {}
 	
+	
+	public String getCodigoProducto() {
+		return codigoProducto;
+	}
+	public void setCodigoProducto(String codigoProducto) {
+		this.codigoProducto = codigoProducto;
+	}
 	public String getNombre() {
 		return nombre;
 	}
@@ -62,12 +73,12 @@ public class ProductoDTO {
 		this.mailVendedor = mailVendedor;
 	}
 
-	public String getCodigoProducto() {
-		return codigoProducto;
+	public ProductoEstado getEstado() {
+		return estado;
 	}
 
-	public void setCodigoProducto(String codigoProducto) {
-		this.codigoProducto = codigoProducto;
+	public void setEstado(ProductoEstado estado) {
+		this.estado = estado;
 	}
 
 }
