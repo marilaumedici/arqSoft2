@@ -32,7 +32,7 @@ public class VendedorController {
     consumes = MediaType.APPLICATION_JSON_VALUE, 
     produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(nickname = "crear_vendedor", value = "Crea un vendedor")
-	public void crearUsuario(@RequestBody VendedorDTO request) {
+	public void crearVendedor(@RequestBody VendedorDTO request) {
 
     	try {
     		
@@ -79,7 +79,7 @@ public class VendedorController {
     //consumes = MediaType.APPLICATION_JSON_VALUE, 
     produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(nickname = "borrar_vendedor", value = "Borra un vendedor logicamente")
-	public void eliminarUsuario(@PathVariable(value = "email") String mail) {
+	public void eliminarVendedor(@PathVariable(value = "email") String mail) {
 
 			try {
 				

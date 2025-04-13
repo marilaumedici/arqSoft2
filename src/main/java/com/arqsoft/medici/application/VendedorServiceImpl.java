@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
 import com.arqsoft.medici.domain.dto.VendedorDTO;
 import com.arqsoft.medici.domain.dto.VendedorDatosDTO;
