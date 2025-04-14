@@ -20,6 +20,7 @@ import com.arqsoft.medici.domain.dto.VendedorDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
+import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.persistence.VendedorRepository;
 
@@ -35,6 +36,7 @@ public class VendedorServiceTest {
 	private String email_invalido = "agustus";
 	private String email = "agustus@gmail.com";
 	private String razonSoacial = "Agustus Delpino";
+	private String razonSoacial_Nueva = "Agustus Delpino Empresas";
 	
 	@Captor
 	private ArgumentCaptor<Vendedor> vendedorCaptor;
@@ -125,8 +127,131 @@ public class VendedorServiceTest {
 
 	}
 	
+	@Test
+	public void modificarVendedorExistenteActivoOK() {
+		
+		Vendedor vendedorBD = new Vendedor(email, razonSoacial);
+		Optional<Vendedor> vendedorOpcional = Optional.of(vendedorBD); 
+		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
+		when(vendedorRepository.save(any(Vendedor.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		VendedorDTO request = new VendedorDTO(email, razonSoacial_Nueva);
+		assertDoesNotThrow(() -> { vendedorService.modificarVendedor(request); });
+		
+		verify(vendedorRepository, times(1)).findById(email);
+		verify(vendedorRepository, times(1)).save(vendedorBD);
+		verify(vendedorRepository).save(vendedorCaptor.capture());
+
+		Vendedor capturado = vendedorCaptor.getValue();
+		
+		assertEquals(email, capturado.getMail());
+		assertEquals(razonSoacial_Nueva, capturado.getRazonSocial());
+		assertEquals(VendedorEstado.ACTIVO, capturado.getEstado());
+		
+	}
 	
+	@Test
+	public void modificarVendedorExistenteBorrado() {
+		
+		Vendedor vendedorBD = new Vendedor(email, razonSoacial);
+		vendedorBD.setEstado(VendedorEstado.BORRADO);
+		Optional<Vendedor> vendedorOpcional = Optional.of(vendedorBD); 
+		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
+		
+		VendedorDTO request = new VendedorDTO(email, razonSoacial_Nueva);
+		assertThrows(VendedorNoEncontradoException.class, () -> {  vendedorService.modificarVendedor(request); });
+		
+		verify(vendedorRepository, times(1)).findById(email);
+
+	}
 	
+	@Test
+	public void modificarVendedorInexistente() {
+		
+		Optional<Vendedor> vendedorOpcional = Optional.empty(); 
+		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
+		
+		VendedorDTO request = new VendedorDTO(email, razonSoacial_Nueva);
+		assertThrows(VendedorNoEncontradoException.class, () -> {  vendedorService.modificarVendedor(request); });
+		
+		verify(vendedorRepository, times(1)).findById(email);
+
+	}
+	
+	@Test
+	public void modificarVendedorMailVacio() {
+		
+		VendedorDTO request = new VendedorDTO("", razonSoacial_Nueva);
+		assertThrows(InternalErrorException.class, () -> {  vendedorService.modificarVendedor(request); });
+		
+
+	}
+	
+	@Test
+	public void modificarVendedorMailNull() {
+		
+		VendedorDTO request = new VendedorDTO(null, razonSoacial_Nueva);
+		assertThrows(InternalErrorException.class, () -> {  vendedorService.modificarVendedor(request); });
+		
+
+	}
+	
+	@Test
+	public void eliminarVendedorOK() {
+		
+		Vendedor vendedorBD = new Vendedor(email, razonSoacial);
+		Optional<Vendedor> vendedorOpcional = Optional.of(vendedorBD); 
+		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
+		when(vendedorRepository.save(any(Vendedor.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		assertDoesNotThrow(() -> { vendedorService.eliminarVendedor(email); });
+		
+		verify(vendedorRepository, times(1)).findById(email);
+		verify(vendedorRepository, times(1)).save(vendedorBD);
+		verify(vendedorRepository).save(vendedorCaptor.capture());
+
+		Vendedor capturado = vendedorCaptor.getValue();
+		
+		assertEquals(email, capturado.getMail());
+		assertEquals(razonSoacial, capturado.getRazonSocial());
+		assertEquals(VendedorEstado.BORRADO, capturado.getEstado());
+		
+	}
+	
+	@Test
+	public void eliminarVendedorBorradoOK() {
+		
+		Vendedor vendedorBD = new Vendedor(email, razonSoacial);
+		vendedorBD.setEstado(VendedorEstado.BORRADO);
+		Optional<Vendedor> vendedorOpcional = Optional.of(vendedorBD); 
+		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
+		when(vendedorRepository.save(any(Vendedor.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		assertDoesNotThrow(() -> { vendedorService.eliminarVendedor(email); });
+		
+		verify(vendedorRepository, times(1)).findById(email);
+		verify(vendedorRepository, times(1)).save(vendedorBD);
+		verify(vendedorRepository).save(vendedorCaptor.capture());
+
+		Vendedor capturado = vendedorCaptor.getValue();
+		
+		assertEquals(email, capturado.getMail());
+		assertEquals(razonSoacial, capturado.getRazonSocial());
+		assertEquals(VendedorEstado.BORRADO, capturado.getEstado());
+		
+	}
+	
+	@Test
+	public void eliminarVendedorInexistente() {
+		
+		Optional<Vendedor> vendedorOpcional = Optional.empty(); 
+		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
+		
+		assertThrows(VendedorNoEncontradoException.class, () -> {  vendedorService.eliminarVendedor(email); });
+
+		verify(vendedorRepository, times(1)).findById(email);
+
+	}
 
 	public VendedorRepository getVendedorRepository() {
 		return vendedorRepository;
