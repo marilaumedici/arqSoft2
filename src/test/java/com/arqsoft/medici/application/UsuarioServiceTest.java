@@ -22,6 +22,7 @@ import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.UsuarioExistenteException;
 import com.arqsoft.medici.domain.utils.UsuarioEstado;
 import com.arqsoft.medici.infrastructure.persistence.UsuarioRepository;
+import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
 
 @ExtendWith(MockitoExtension.class)
 public class UsuarioServiceTest {
@@ -39,6 +40,9 @@ public class UsuarioServiceTest {
 	private String email    		= "agussusu@gmal.com";
 	private String nombre   		= "Agustin";
 	private String apellido 		= "Delpane";
+	
+	private String nombre_otro   		= "Agustina";
+	private String apellido_otro 		= "Delpaloma";
 	
 	@Test
 	public void testCrearUsuarioInexistenteOK() throws UsuarioExistenteException, InternalErrorException, FormatoEmailInvalidoException {
@@ -134,6 +138,146 @@ public class UsuarioServiceTest {
 		//assertDoesNotThrow(() -> { usuarioService.crearUsuario(request); });
 		
 	}
+	
+	@Test
+	public void testModificarUsuarioActivoOk() {
+		
+		Usuario usuarioBD = new Usuario(nombre, apellido, email, UsuarioEstado.ACTIVO);
+		Optional<Usuario> usuarioOpcional = Optional.of(usuarioBD); 
+		when(usuarioRepository.findById(email)).thenReturn(usuarioOpcional);
+		when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		UsuarioDTO request = new UsuarioDTO(nombre_otro, apellido_otro, email);		
+		assertDoesNotThrow(() -> { usuarioService.modificarUsuario(request); });
+		
+		verify(usuarioRepository, times(1)).findById(email);
+		verify(usuarioRepository, times(1)).save(any(Usuario.class));
+		verify(usuarioRepository).save(usuarioCaptor.capture());
+		
+		Usuario capturado = usuarioCaptor.getValue();
+
+	    assertEquals(email, capturado.getMail());
+	    assertEquals(nombre_otro, capturado.getNombre());
+	    assertEquals(apellido_otro, capturado.getApellido());
+	    assertEquals(UsuarioEstado.ACTIVO, capturado.getEstado());
+		
+	}
+	
+	@Test
+	public void testModificarUsuarioBorrado() {
+		
+		Usuario usuarioBD = new Usuario(nombre, apellido, email, UsuarioEstado.BORRADO);
+		Optional<Usuario> usuarioOpcional = Optional.of(usuarioBD); 
+		when(usuarioRepository.findById(email)).thenReturn(usuarioOpcional);
+
+		UsuarioDTO request = new UsuarioDTO(nombre_otro, apellido_otro, email);		
+		assertThrows(UsuarioNoEncontradoException.class, () -> {  usuarioService.modificarUsuario(request); });
+
+		verify(usuarioRepository, times(1)).findById(email);
+		
+	}
+	
+	@Test
+	public void testModificarUsuarioInexistente() {
+		
+		Optional<Usuario> usuarioOpcional = Optional.empty(); 
+		when(usuarioRepository.findById(email)).thenReturn(usuarioOpcional);
+
+		UsuarioDTO request = new UsuarioDTO(nombre_otro, apellido_otro, email);		
+		assertThrows(UsuarioNoEncontradoException.class, () -> {  usuarioService.modificarUsuario(request); });
+
+		verify(usuarioRepository, times(1)).findById(email);
+		
+	}
+	
+	@Test
+	public void testModificarUsuarioMailVacio() {
+
+		UsuarioDTO request = new UsuarioDTO(nombre_otro, apellido_otro, "");		
+		assertThrows(InternalErrorException.class, () -> {  usuarioService.modificarUsuario(request); });
+		
+	}
+	
+	@Test
+	public void testModificarUsuarioMailNull() {
+
+		UsuarioDTO request = new UsuarioDTO(nombre_otro, apellido_otro, null);		
+		assertThrows(InternalErrorException.class, () -> {  usuarioService.modificarUsuario(request); });
+		
+	}
+	
+	@Test
+	public void testEliminarUsuarioActivoOk() {
+		
+		Usuario usuarioBD = new Usuario(nombre, apellido, email, UsuarioEstado.ACTIVO);
+		Optional<Usuario> usuarioOpcional = Optional.of(usuarioBD); 
+		when(usuarioRepository.findById(email)).thenReturn(usuarioOpcional);
+		when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		assertDoesNotThrow(() -> { usuarioService.eliminarUsuario(email); });
+		
+		verify(usuarioRepository, times(1)).findById(email);
+		verify(usuarioRepository, times(1)).save(any(Usuario.class));
+		verify(usuarioRepository).save(usuarioCaptor.capture());
+		
+		Usuario capturado = usuarioCaptor.getValue();
+
+	    assertEquals(email, capturado.getMail());
+	    assertEquals(nombre, capturado.getNombre());
+	    assertEquals(apellido, capturado.getApellido());
+	    assertEquals(UsuarioEstado.BORRADO, capturado.getEstado());
+		
+	}
+	
+	@Test
+	public void testEliminarUsuarioBorradoOk() {
+		
+		Usuario usuarioBD = new Usuario(nombre, apellido, email, UsuarioEstado.BORRADO);
+		Optional<Usuario> usuarioOpcional = Optional.of(usuarioBD); 
+		when(usuarioRepository.findById(email)).thenReturn(usuarioOpcional);
+		when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		assertDoesNotThrow(() -> { usuarioService.eliminarUsuario(email); });
+		
+		verify(usuarioRepository, times(1)).findById(email);
+		verify(usuarioRepository, times(1)).save(any(Usuario.class));
+		verify(usuarioRepository).save(usuarioCaptor.capture());
+		
+		Usuario capturado = usuarioCaptor.getValue();
+
+	    assertEquals(email, capturado.getMail());
+	    assertEquals(nombre, capturado.getNombre());
+	    assertEquals(apellido, capturado.getApellido());
+	    assertEquals(UsuarioEstado.BORRADO, capturado.getEstado());
+		
+	}
+	
+	@Test
+	public void testEliminarUsuarioInexsistente() {
+		
+		Optional<Usuario> usuarioOpcional = Optional.empty(); 
+		when(usuarioRepository.findById(email)).thenReturn(usuarioOpcional);
+
+		assertThrows(UsuarioNoEncontradoException.class, () -> {  usuarioService.eliminarUsuario(email); });
+
+		verify(usuarioRepository, times(1)).findById(email);
+		
+	}
+	
+	@Test
+	public void testEliminarUsuarioMailVacio() {
+
+		assertThrows(InternalErrorException.class, () -> {  usuarioService.eliminarUsuario(""); });
+
+	}
+	
+	@Test
+	public void testEliminarUsuarioMailNull() {
+
+		assertThrows(InternalErrorException.class, () -> {  usuarioService.eliminarUsuario(null); });
+
+	}
+	
 
 	public UsuarioRepository getUsuarioRepository() {
 		return usuarioRepository;
