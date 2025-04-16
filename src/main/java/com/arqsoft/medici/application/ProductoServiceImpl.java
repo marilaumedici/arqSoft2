@@ -15,6 +15,7 @@ import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
+import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.persistence.ProductoRepository;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.data.domain.PageRequest;
@@ -161,6 +162,44 @@ public class ProductoServiceImpl implements ProductoService {
 	    return new ProductosVendedorDTO(productosPage.getNumber(), productosPage.getTotalPages(), productosPage.getTotalElements(), response);
 	}
 	
+	@Override
+	public Producto obtenerProductoByID(String productoId) throws ProductoInexistenteException {
+		
+		
+		Optional<Producto> opcionalProducto = productoRepository.findById(productoId);
+		
+		if(existeProducto(opcionalProducto)) {
+			return opcionalProducto.get();
+			
+		}
+		
+		throw new ProductoInexistenteException();
+	}
+	
+	@Override
+	public void descontarStock(Producto producto, Integer cantidad) throws ValidacionException {
+		
+		if(cantidad <= 0) {
+			throw new ValidacionException("La cantidad ingresada debe ser mayor o igual a 1.");
+			
+		}
+		
+		if(cantidad > producto.getStock()) {
+			throw new ValidacionException("La cantidad ingresada debe ser menor o igual al stock disponible.");
+
+		}
+
+		producto.setStock(producto.getStock() - cantidad);
+		
+		if(producto.getStock() == 0) {
+			producto.setEstado(ProductoEstado.NO_DISPONIBLE);
+			
+		}
+		
+		productoRepository.save(producto);
+		
+	}
+	
 	private void validarProductoMismoVendedor(String mailVendedorProducto, String mailVendedorIngresado, String mensaje) throws InternalErrorException {
 		
 		if(! mailVendedorProducto.equals(mailVendedorIngresado)) {
@@ -169,9 +208,16 @@ public class ProductoServiceImpl implements ProductoService {
 		}
 	}
 	
+	/**
+	 * Dice si un producto esta disponible para su compra si esta en estado DISPONIBLE y su vendedor esta ACTIVO
+	 * @param opcionalProducto
+	 * @return
+	 */
 	private boolean existeProducto(Optional<Producto> opcionalProducto) {
 		
-		return opcionalProducto.isPresent() && opcionalProducto.get().getEstado().equals(ProductoEstado.DISPONIBLE);
+		return opcionalProducto.isPresent() && 
+			   opcionalProducto.get().getEstado().equals(ProductoEstado.DISPONIBLE) &&
+			   opcionalProducto.get().getVendedor().getEstado().equals(VendedorEstado.ACTIVO);
 		
 	}
 	
@@ -255,5 +301,6 @@ public class ProductoServiceImpl implements ProductoService {
 	public void setVendedorService(VendedorService vendedorService) {
 		this.vendedorService = vendedorService;
 	}
+
 
 }

@@ -6,8 +6,9 @@ import org.springframework.data.annotation.Id;
 
 public class Venta {
 	
+
 	@Id
-	private String vendedorId;
+	private String ventaId;
 	private String productoId;
 	private String mailVendedor;
 	private String mailComprador;
@@ -16,12 +17,31 @@ public class Venta {
 	private double precioFinal;
 	private Integer cantidadComprada;
 	
-	public String getVendedorId() {
-		return vendedorId;
+	
+	public Venta(String productoId, String mailVendedor, String mailComprador, Date fechaVenta,
+			double precioIndividual, double precioFinal, Integer cantidadComprada) {
+		super();
+
+		this.productoId = productoId;
+		this.mailVendedor = mailVendedor;
+		this.mailComprador = mailComprador;
+		this.fechaVenta = fechaVenta;
+		this.precioIndividual = precioIndividual;
+		this.precioFinal = precioFinal;
+		this.cantidadComprada = cantidadComprada;
 	}
-	public void setVendedorId(String vendedorId) {
-		this.vendedorId = vendedorId;
+	
+	public Venta() {
+
 	}
+	
+	public String getVentaId() {
+		return ventaId;
+	}
+	public void setVentaId(String ventaId) {
+		this.ventaId = ventaId;
+	}
+
 	public String getProductoId() {
 		return productoId;
 	}

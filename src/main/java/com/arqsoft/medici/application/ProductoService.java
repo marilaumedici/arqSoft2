@@ -1,5 +1,6 @@
 package com.arqsoft.medici.application;
 
+import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
 import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
@@ -17,5 +18,15 @@ public interface ProductoService {
 	public void eliminarProducto(String id, String mail) throws InternalErrorException, ProductoInexistenteException;
 	
 	public ProductosVendedorDTO obtenerProductosVendedor(String mail, Integer pagina, Integer size) throws InternalErrorException;
+
+	/**
+	 * Recibe un productoId y devuelve un producto DISPONIBLE
+	 * @param productoId
+	 * @return Producto
+	 * @throws ProductoInexistenteException
+	 */
+	public Producto obtenerProductoByID(String productoId) throws ProductoInexistenteException;
+
+	public void descontarStock(Producto producto, Integer cantidad) throws ValidacionException;
 
 }

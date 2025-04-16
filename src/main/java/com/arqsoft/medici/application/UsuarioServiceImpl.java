@@ -86,6 +86,19 @@ public class UsuarioServiceImpl implements UsuarioService {
 		    throw new UsuarioNoEncontradoException();
 		}
 	}
+	
+	@Override
+	public Usuario obtenerUsuarioByID(String mail) throws UsuarioNoEncontradoException {
+		
+	Optional<Usuario> usuarioOpcional = usuarioRepository.findById(mail);
+		
+		if(usuarioOpcional.isPresent() && usuarioOpcional.get().getEstado().equals(UsuarioEstado.ACTIVO)) {
+			return usuarioOpcional.get();
+				
+		}else {
+			throw new UsuarioNoEncontradoException();
+		}
+	}
 
 	private void actualizarDatosUsuario(UsuarioDTO request, Usuario usuario) {
 		
