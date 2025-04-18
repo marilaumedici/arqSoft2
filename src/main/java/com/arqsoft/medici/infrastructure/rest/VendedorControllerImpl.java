@@ -2,14 +2,6 @@ package com.arqsoft.medici.infrastructure.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.arqsoft.medici.application.VendedorService;
@@ -19,20 +11,17 @@ import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
-import io.swagger.annotations.ApiOperation;
+import com.arqsoft.medici.infrastructure.rest.puertos.VendedorController;
+
 
 @RestController
-@RequestMapping("/vendedor")
-public class VendedorController {
+public class VendedorControllerImpl implements VendedorController {
 	
 	@Autowired
 	private VendedorService vendedorService;
 	
-    @PostMapping(path = "/", 
-    consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "crear_vendedor", value = "Crea un vendedor")
-	public void crearVendedor(@RequestBody VendedorDTO request) {
+    @Override
+	public void crearVendedor(VendedorDTO request) {
 
     	try {
     		
@@ -53,11 +42,8 @@ public class VendedorController {
 		}
     }
     
-    @PutMapping(path = "/", 
-    consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "modificar_vendedor", value = "Modifica los datos de un vendedor")
-	public void modificarVendedor(@RequestBody VendedorDTO request) {
+    @Override
+	public void modificarVendedor(VendedorDTO request) {
     	
     	try {
     		
@@ -75,11 +61,8 @@ public class VendedorController {
 		}
     }
     
-    @DeleteMapping(path = "/{email}", 
-    //consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "borrar_vendedor", value = "Borra un vendedor logicamente")
-	public void eliminarVendedor(@PathVariable(value = "email") String mail) {
+    @Override
+	public void eliminarVendedor(String mail) {
 
 			try {
 				
@@ -98,11 +81,8 @@ public class VendedorController {
     }
 	
     
-    @GetMapping(path = "/{vendedorMail}", 
-    //consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "obtener_vendedor", value = "Obtiene un vendedor")
-	public VendedorDatosDTO obtenerVendedor(@PathVariable(value = "vendedorMail") String mail) {
+    @Override
+	public VendedorDatosDTO obtenerVendedor(String mail) {
 		
     	return vendedorService.obtenerVendedor(mail);
     	

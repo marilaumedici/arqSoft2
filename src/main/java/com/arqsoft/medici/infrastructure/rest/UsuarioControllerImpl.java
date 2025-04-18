@@ -2,13 +2,6 @@ package com.arqsoft.medici.infrastructure.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.arqsoft.medici.application.UsuarioService;
@@ -17,21 +10,18 @@ import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.UsuarioExistenteException;
 import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
-import io.swagger.annotations.ApiOperation;
+import com.arqsoft.medici.infrastructure.rest.puertos.UsuarioController;
+
 
 @RestController
-@RequestMapping("/usuario")
-public class UsuarioController {
+public class UsuarioControllerImpl implements UsuarioController {
 	
 	@Autowired
 	private UsuarioService usuarioService;
 	
 	
-    @PostMapping(path = "/", 
-    consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "crear_usuario", value = "Crea un usuario")
-	public void crearUsuario(@RequestBody UsuarioDTO request) {
+	@Override
+	public void crearUsuario(UsuarioDTO request) {
     	
     	try {
 			usuarioService.crearUsuario(request);
@@ -51,11 +41,8 @@ public class UsuarioController {
 		}	
     }
     
-    @PutMapping(path = "/", 
-    consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "modificar_usuario", value = "Modifica un usuario")
-	public void modificarUsuario(@RequestBody UsuarioDTO request) {
+	@Override
+	public void modificarUsuario(UsuarioDTO request) {
     	
 			try {
 				usuarioService.modificarUsuario(request);
@@ -72,11 +59,8 @@ public class UsuarioController {
 			}
     }
 	
-    @DeleteMapping(path = "/{email}", 
-    //consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "borrar_usuario", value = "Borra un usuario logicamente")
-	public void eliminarUsuario(@PathVariable(value = "email") String mail) {
+	@Override
+	public void eliminarUsuario(String mail) {
     	
 			try {
 				usuarioService.eliminarUsuario(mail);

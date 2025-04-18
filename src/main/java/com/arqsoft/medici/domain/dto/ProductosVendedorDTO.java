@@ -21,6 +21,13 @@ public class ProductosVendedorDTO {
 	public ProductosVendedorDTO() {
 
 	}
+	
+	public ProductosVendedorDTO(Integer paginaActual, Integer totalPaginas, long totalResultados) {
+		super();
+		this.paginaActual = paginaActual;
+		this.totalPaginas = totalPaginas;
+		this.totalResultados = totalResultados;
+	}
 
 	public List<ProductoResponseDTO> getProductos() {
 		return productos;

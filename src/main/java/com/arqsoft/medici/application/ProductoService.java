@@ -1,6 +1,7 @@
 package com.arqsoft.medici.application;
 
 import com.arqsoft.medici.domain.Producto;
+import com.arqsoft.medici.domain.dto.FiltroBuscadorProducto;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
 import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
@@ -28,5 +29,7 @@ public interface ProductoService {
 	public Producto obtenerProductoByID(String productoId) throws ProductoInexistenteException;
 
 	public void descontarStock(Producto producto, Integer cantidad) throws ValidacionException;
+
+	public ProductosVendedorDTO obtenerProductosFiltrados(FiltroBuscadorProducto request);
 
 }

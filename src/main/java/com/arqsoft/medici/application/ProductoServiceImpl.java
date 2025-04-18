@@ -3,10 +3,13 @@ package com.arqsoft.medici.application;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
+import com.arqsoft.medici.domain.dto.FiltroBuscadorProducto;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
 import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
@@ -21,12 +24,18 @@ import io.micrometer.common.util.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 @Service
 public class ProductoServiceImpl implements ProductoService {
 	
 	@Autowired
 	private ProductoRepository productoRepository;
+	
+	@Autowired
+	private MongoTemplate mongoTemplate;
 	
 	@Autowired
 	private VendedorService vendedorService;
@@ -149,17 +158,13 @@ public class ProductoServiceImpl implements ProductoService {
 			
 		}
 
-		List<ProductoResponseDTO> response = new ArrayList<ProductoResponseDTO>();
 		Pageable pageable = PageRequest.of(pagina, size);
-	    //Page<Producto> productosPage = productoRepository.findAll(pageable);
 	    Page<Producto> productosPage = productoRepository.findByVendedor_Mail(mailVendedor, pageable);
 	    List<Producto> productos = productosPage.getContent();
 	    
-	    for(Producto p : productos) {
-	    	ProductoResponseDTO pDTO = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
-	    	response.add(pDTO);
-	    }
-	    return new ProductosVendedorDTO(productosPage.getNumber(), productosPage.getTotalPages(), productosPage.getTotalElements(), response);
+	    ProductosVendedorDTO response = productoEntityToDTO(productos, productosPage.getNumber(), productosPage.getTotalPages(), productosPage.getTotalElements());
+	    
+	    return response;
 	}
 	
 	@Override
@@ -198,6 +203,53 @@ public class ProductoServiceImpl implements ProductoService {
 		
 		productoRepository.save(producto);
 		
+	}
+	
+	@Override
+	public ProductosVendedorDTO obtenerProductosFiltrados(FiltroBuscadorProducto request) {
+
+		PageRequest pageRequest = PageRequest.of(request.getPagina(), request.getSize());
+		
+		List<Criteria> criteriosAnd = new ArrayList<>();
+		
+		//Solo hay que traer productos disponibles para su compra
+	    criteriosAnd.add(Criteria.where("estado").is(ProductoEstado.DISPONIBLE));
+		
+	    //Filtra por precio
+		if (request.getPrecioMinimo() != null && request.getPrecioMaximo() != null) {
+		    criteriosAnd.add(Criteria.where("precio").gte(request.getPrecioMinimo()).lte(request.getPrecioMaximo()));
+		} else if (request.getPrecioMinimo() != null) {
+		    criteriosAnd.add(Criteria.where("precio").gte(request.getPrecioMinimo()));
+		} else if (request.getPrecioMaximo() != null) {
+		    criteriosAnd.add(Criteria.where("precio").lte(request.getPrecioMaximo()));
+		}
+
+		//Filtra por categoria
+		if (StringUtils.isNotBlank(String.valueOf(request.getCategoria()))) {
+		    criteriosAnd.add(Criteria.where("categoria").is(request.getCategoria()));
+		}
+
+		//Filtra por una descripcion del producto
+		if (StringUtils.isNotBlank(request.getDescripcion())) {
+		    String regex = ".*" + Pattern.quote(request.getDescripcion().trim()) + ".*";
+		    Criteria nombreCriteria      = Criteria.where("nombre").regex(regex, "i");
+		    Criteria descripcionCriteria = Criteria.where("descripcion").regex(regex, "i");
+
+		    Criteria orCriterio = new Criteria().orOperator(nombreCriteria, descripcionCriteria);
+		    criteriosAnd.add(orCriterio);
+		}
+
+		Criteria finalCriteria = new Criteria().andOperator(criteriosAnd.toArray(new Criteria[0]));
+		Query query = new Query(finalCriteria).with(pageRequest);
+
+		List<Producto> productos = mongoTemplate.find(query, Producto.class);
+		
+		long totalElementos = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), Producto.class);
+		int totalPaginas = (int) Math.ceil((double) totalElementos / request.getSize());
+
+		ProductosVendedorDTO response = productoEntityToDTO(productos, request.getPagina(), totalPaginas, totalElementos);
+		
+		return response;
 	}
 	
 	private void validarProductoMismoVendedor(String mailVendedorProducto, String mailVendedorIngresado, String mensaje) throws InternalErrorException {
@@ -285,6 +337,18 @@ public class ProductoServiceImpl implements ProductoService {
 			
 		}
 	}
+	
+	private ProductosVendedorDTO productoEntityToDTO(List<Producto> productos, Integer paginaActual, Integer totalPaginas, long totalResultados) {
+		
+		ProductosVendedorDTO response =  new ProductosVendedorDTO( paginaActual,  totalPaginas, totalResultados);
+		
+		for(Producto p : productos) {
+	    	ProductoResponseDTO pDTO = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
+	    	response.getProductos().add(pDTO);
+	    }
+		
+		return response;
+	}
 
 	public ProductoRepository getProductoRepository() {
 		return productoRepository;
@@ -302,5 +366,12 @@ public class ProductoServiceImpl implements ProductoService {
 		this.vendedorService = vendedorService;
 	}
 
+	public MongoTemplate getMongoTemplate() {
+		return mongoTemplate;
+	}
+
+	public void setMongoTemplate(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
+	}
 
 }

@@ -1,20 +1,11 @@
 package com.arqsoft.medici.infrastructure.rest;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.arqsoft.medici.application.ProductoService;
+import com.arqsoft.medici.domain.dto.FiltroBuscadorProducto;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
 import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
@@ -22,20 +13,17 @@ import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
-import io.swagger.annotations.ApiOperation;
+import com.arqsoft.medici.infrastructure.rest.puertos.ProductoController;
+
 
 @RestController
-@RequestMapping("/producto")
-public class ProductoController {
+public class ProductoControllerImpl implements ProductoController {
 	
 	@Autowired
 	private ProductoService productoService;
 	
-    @PostMapping(path = "/", 
-    consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "crear_producto", value = "Crea un producto")
-	public ProductoResponseDTO crearProducto(@RequestBody ProductoDTO request) {
+	@Override
+	public ProductoResponseDTO crearProducto(ProductoDTO request) {
     	
     	try {
     		
@@ -60,11 +48,8 @@ public class ProductoController {
 		}
     }
     
-    @PutMapping(path = "/{productoId}", 
-    consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "modificar_producto", value = "Modifica los datos de un producto")
-	public void modificarProducto(@PathVariable(value = "productoId") String id, @RequestBody ProductoDTO request) {
+	@Override
+	public void modificarProducto(String id, ProductoDTO request) {
     	
     	try {
     		
@@ -82,11 +67,8 @@ public class ProductoController {
 		}
     }
     
-    @DeleteMapping(path = "/{productoId}/{mailVendedor}", 
-    //consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "borrar_producto", value = "Borra un producto logicamente")
-	public void eliminarProducto(@PathVariable(value = "productoId") String id, @PathVariable(value = "mailVendedor") String mail) {
+	@Override
+	public void eliminarProducto(String id, String mail) {
 
 		try {
 			
@@ -104,13 +86,10 @@ public class ProductoController {
 		}
     }
     
-    @GetMapping(path = "/{mailVendedor}", 
-    //consumes = MediaType.APPLICATION_JSON_VALUE, 
-    produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(nickname = "get_productos_vendedor", value = "Obtiene los productos de un vendedor")
-	public ProductosVendedorDTO obtenerProductosVendedor(@PathVariable(value = "mailVendedor") String mail, @RequestParam(name = "pagina", defaultValue = "0")  Integer page, @RequestParam(name = "size", defaultValue = "999")  Integer elementos) {
+	@Override
+	public ProductosVendedorDTO obtenerProductosVendedor(String mail, Integer page, Integer elementos) {
     	
-    	ProductosVendedorDTO response = null;
+    	ProductosVendedorDTO response = new ProductosVendedorDTO();
 		try {
 			
 			response = productoService.obtenerProductosVendedor(mail, page, elementos);
@@ -125,6 +104,16 @@ public class ProductoController {
     	
     	return response;
     }
+	
+	@Override
+	public ProductosVendedorDTO obtenerProductosFiltro(FiltroBuscadorProducto request) {
+		
+		ProductosVendedorDTO response = new ProductosVendedorDTO();
+		
+		response = productoService.obtenerProductosFiltrados(request);
+			
+		return response;
+	}
     
 
 	public ProductoService getProductoService() {
