@@ -225,7 +225,7 @@ public class ProductoServiceImpl implements ProductoService {
 		}
 
 		//Filtra por categoria
-		if (StringUtils.isNotBlank(String.valueOf(request.getCategoria()))) {
+		if (request.getCategoria() != null) {
 		    criteriosAnd.add(Criteria.where("categoria").is(request.getCategoria()));
 		}
 
