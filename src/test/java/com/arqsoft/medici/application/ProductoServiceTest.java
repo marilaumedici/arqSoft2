@@ -203,10 +203,79 @@ public class ProductoServiceTest {
 	@Test
 	public void testModificarProductoMailCodigoProductoVacio() {
 		
-
 		ProductoDTO request = new ProductoDTO("", nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor1);
 		assertThrows(InternalErrorException.class, () -> {  productoService.modificarProducto(request); });
 
+	}
+	
+	@Test
+	public void testEliminarProductoExistente() {
+		
+		Producto producto = new Producto(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS);
+		Vendedor vendedor = new Vendedor(mailVendedor1, razonSoacialVendedor1);
+		producto.setVendedor(vendedor);
+		Optional<Producto> productoOpcional = Optional.of(producto); 
+		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
+		
+		when(productoRepository.save(any(Producto.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		assertDoesNotThrow(() -> { productoService.eliminarProducto(codigoP1, mailVendedor1); });
+
+		verify(productoRepository, times(1)).findById(codigoP1);
+		verify(productoRepository, times(1)).save(any(Producto.class));
+		verify(productoRepository).save(productoCaptor.capture());
+		
+		Producto capturado = productoCaptor.getValue();
+
+	    assertEquals(nombreP1, capturado.getNombre());
+	    assertEquals(descripcionP1, capturado.getDescripcion());
+	    assertEquals(ALIMENTOS, capturado.getCategoria());
+	    assertEquals(ProductoEstado.NO_DISPONIBLE, capturado.getEstado());
+	    assertEquals(precioP1, capturado.getPrecio());
+	    assertEquals(stockP1, capturado.getStock());
+	    assertEquals(mailVendedor1, capturado.getVendedor().getMail());
+		
+	}
+	
+	@Test
+	public void testEliminarProductoInexistenteEnBase() {
+		
+		Optional<Producto> productoOpcional = Optional.empty(); 
+		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
+		
+		assertThrows(ProductoInexistenteException.class, () -> {  productoService.eliminarProducto(codigoP1, mailVendedor1); });
+
+		verify(productoRepository, times(1)).findById(codigoP1);
+		
+	}
+	
+	@Test
+	public void testEliminarProductoMailVendedorVacio() {
+
+		assertThrows(InternalErrorException.class, () -> {  productoService.eliminarProducto(codigoP1, ""); });
+
+	}
+	
+	@Test
+	public void testEliminarProductoCodigoProductoVacio() {
+
+		assertThrows(InternalErrorException.class, () -> {  productoService.eliminarProducto("", mailVendedor1); });
+
+	}
+	
+	
+	@Test
+	public void testEliminarProductoDeOtroVendedor() {
+		
+		Producto producto = new Producto(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS);
+		Vendedor vendedor = new Vendedor(mailVendedor1, razonSoacialVendedor1);
+		producto.setVendedor(vendedor);
+		Optional<Producto> productoOpcional = Optional.of(producto); 
+		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
+		
+		assertThrows(InternalErrorException.class, () -> {  productoService.eliminarProducto(codigoP1, mailVendedor2); });
+
+		verify(productoRepository, times(1)).findById(codigoP1);
 		
 	}
 	
