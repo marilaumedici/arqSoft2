@@ -340,7 +340,7 @@ public class ProductoServiceImpl implements ProductoService {
 			throw new ValidacionException("Debe ingresar un stock inicial para el producto.");
 			
 		}
-		if(request.getCategoria() != null) {
+		if(request.getCategoria() == null) {
 			throw new ValidacionException("Debe ingresar una categoria para el producto.");
 			
 		}

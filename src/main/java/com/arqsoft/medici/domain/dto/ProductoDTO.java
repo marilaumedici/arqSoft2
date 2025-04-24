@@ -23,6 +23,17 @@ public class ProductoDTO {
 		this.mailVendedor = mailVendedor;
 	}
 	
+	public ProductoDTO(String codigo, String nombre, String descripcion, double precio, int stock, ProductoCategoria categoria, String mailVendedor) {
+		super();
+		this.nombre = nombre;
+		this.descripcion = descripcion;
+		this.precio = precio;
+		this.stock = stock;
+		this.categoria = categoria;
+		this.mailVendedor = mailVendedor;
+		this.codigoProducto =  codigo;
+	}
+	
 	public ProductoDTO() {}
 	
 	public String getNombre() {

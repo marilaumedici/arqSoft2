@@ -32,6 +32,17 @@ public class Producto {
 		this.estado = ProductoEstado.DISPONIBLE;
 	}
 	
+	public Producto(String codigo, String nombre, String descripcion, double precio, int stock, ProductoCategoria categoria) {
+		super();
+		this.nombre = nombre;
+		this.descripcion = descripcion;
+		this.precio = precio;
+		this.stock = stock;
+		this.categoria = categoria;
+		this.estado = ProductoEstado.DISPONIBLE;
+		this.productoId = codigo;
+	}
+	
 	public String getProductoId() {
 		return productoId;
 	}
