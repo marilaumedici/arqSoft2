@@ -1,0 +1,37 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+activate UsuarioRepository
+database MongoDB
+
+title Crear un usuario inexistente en la base
+
+Usuario -> UsuarioController: crearUsuario
+
+UsuarioController -> UsuarioService: crearUsuario
+
+UsuarioService -> UsuarioService: validarEmail
+
+UsuarioService -> UsuarioRepository: obtenerUsuarioByEmail
+
+UsuarioRepository -> MongoDB: obtenerUsuarioByEmail
+
+MongoDB -> UsuarioRepository: <<usuario no encontrado>>
+
+UsuarioRepository -> UsuarioService: <<usuario no encontrado>>
+
+UsuarioService -> UsuarioRepository: crearUsuario
+
+UsuarioRepository -> MongoDB: crearUsuario
+
+
+legend
+<b>ESCENARIO:</b> Registro con un correo inexistente
+
+<b>COMO</b> usuario de Libre Mercado 
+<b>QUIERO</b> poder enrolarme a la aplicacion
+<b>PARA</b> poder comprar articulos a la venta
+end legend
+
+@enduml

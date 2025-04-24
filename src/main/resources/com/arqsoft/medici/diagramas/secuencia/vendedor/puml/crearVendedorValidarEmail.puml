@@ -1,0 +1,28 @@
+@startuml
+actor Vendedor
+activate VendedorController
+activate VendedorService
+
+
+title Crear un vendedor con un mail vacio o invalido
+
+Vendedor -> VendedorController: crearVendedor
+
+VendedorController -> VendedorService: crearVendedor
+
+VendedorService -> VendedorService: validarEmail
+
+VendedorService -> VendedorController: <<FormatoEmailInvalidoException>>
+
+VendedorController -> Vendedor: <<El email debe poseer un formato valido>>
+
+legend
+<b>ESCENARIO:</b> Registro con un correo invalido
+
+<b>DADO</b> que el vendedor intenta registrarse con un correo invalido
+<b>CUANDO</b> confirma su alta en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error FormatoEmailInvalidoException y 
+el vendedor vera el mensaje "El email debe poseer un formato valido"
+end legend
+
+@enduml

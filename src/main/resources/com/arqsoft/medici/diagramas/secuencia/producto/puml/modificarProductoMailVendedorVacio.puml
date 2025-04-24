@@ -1,0 +1,29 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+
+title Un vendedor quiere modificar un producto pero no pasa el mail del vendedor
+
+Vendedor -> ProductoController: modificarProducto
+
+ProductoController -> ProductoService: modificarProducto
+
+ProductoService -> ProductoService: validaCodigoProductoIngresado
+
+ProductoService -> ProductoService: validarEmailVendedorVacio
+
+ProductoService -> ProductoController: <<InternalErrorException>>
+
+ProductoController -> Vendedor: <<El mail del vendedor no puede estar vacio>>
+
+legend
+<b>ESCENARIO:</b> Vendedor modifica un producto sin pasar el codigo de cual
+
+<b>DADO</b> el mail del vendedor es vacio
+<b>CUANDO</b> confirma la modificacion del producto en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error InternalErrorException
+<b>Y</b> el vendedor vera el mensaje de error "El mail del vendedor no puede estar vacio"
+end legend
+
+@enduml

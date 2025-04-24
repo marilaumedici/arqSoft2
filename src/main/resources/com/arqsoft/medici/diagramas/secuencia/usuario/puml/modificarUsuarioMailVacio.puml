@@ -1,0 +1,28 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+
+title Modificar un usuario sin pasar un mail
+
+Usuario -> UsuarioController: modificarUsuario
+
+UsuarioController -> UsuarioService: modificarUsuario
+
+UsuarioService -> UsuarioService: validarEmailNoVacio
+
+UsuarioService -> UsuarioController: <<InternalErrorException>>
+
+UsuarioController -> Usuario: <<El campo mail no debe viajar vacio>>
+
+
+
+legend
+<b>ESCENARIO:</b> No se brinda un mail
+
+<b>DADO</b> que el email es vacio
+<b>CUANDO</b> confirma la modificacion 
+<b>ENTONCES</b> el sistema devolvera el error "El campo mail no debe viajar vacio"
+end legend
+
+@enduml

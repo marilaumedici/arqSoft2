@@ -1,0 +1,41 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+activate UsuarioRepository
+database MongoDB
+
+title Crear un usuario existente con estado ACTIVO en la base
+
+Usuario -> UsuarioController: crearUsuario
+
+UsuarioController -> UsuarioService: crearUsuario
+
+UsuarioService -> UsuarioService: validarEmail
+
+UsuarioService -> UsuarioRepository: obtenerUsuarioByEmail
+
+UsuarioRepository -> MongoDB: obtenerUsuarioByEmail
+
+MongoDB -> UsuarioRepository: <<usuario encontrado>>
+
+UsuarioRepository -> UsuarioService: <<usuario encontrado>>
+
+UsuarioService -> UsuarioService: validaEstadoUsuarioEsActivo
+
+UsuarioService -> UsuarioController: devuelve UsuarioExistenteException
+
+UsuarioController -> Usuario: <<El usuario ya existe>>
+
+
+legend
+<b>ESCENARIO:</b> Registro con un correo existente y el usuario tiene estado ACTIVO
+
+<b>DADO</b> que el usuario intenta registrarse con un correo que ya está en uso 
+y el usuario asociado tiene estado ACTIVO 
+<b>CUANDO</b> confirma su alta en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error UsuarioExistenteException y 
+el usuario ve el mensaje "El usuario ya existe"
+end legend
+
+@enduml

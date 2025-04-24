@@ -1,0 +1,28 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+
+
+title Crear un usuario con un email invalido
+
+Usuario -> UsuarioController: crearUsuario
+
+UsuarioController -> UsuarioService: crearUsuario
+
+UsuarioService -> UsuarioService: validarEmail
+
+UsuarioService -> UsuarioController: <<FormatoEmailInvalidoException>>
+
+UsuarioController -> Usuario: <<El email debe poseer un formato valido>>
+
+legend
+<b>ESCENARIO:</b> Registro con un correo que es vacio o con un formato no valido
+
+<b>DADO</b> que el usuario intenta registrarse con un correo invalido
+<b>CUANDO</b> confirma su alta en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error FormatoEmailInvalidoException
+<b>Y</b> el usuario vera el mensaje de error "El email debe poseer un formato valido"
+end legend
+
+@enduml

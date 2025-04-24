@@ -1,0 +1,27 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+
+title Un vendedor quiere modificar un producto pero no pasa el codigo del producto
+
+Vendedor -> ProductoController: modificarProducto
+
+ProductoController -> ProductoService: modificarProducto
+
+ProductoService -> ProductoService: validaCodigoProductoVacio
+
+ProductoService -> ProductoController: <<InternalErrorException>>
+
+ProductoController -> Vendedor: <<El id del producto no puede estar vacio>>
+
+legend
+<b>ESCENARIO:</b> Vendedor modifica un producto sin pasar el codigo de cual
+
+<b>DADO</b> el codigo de producto es vacio
+<b>CUANDO</b> confirma la modificacion del producto en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error InternalErrorException
+<b>Y</b> el vendedor vera el mensaje de error "El id del producto no puede estar vacio"
+end legend
+
+@enduml

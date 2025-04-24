@@ -1,0 +1,40 @@
+@startuml
+actor Vendedor
+activate VendedorController
+activate VendedorService
+activate VendedorRepository
+database MongoDB
+
+title Crear un vendedor existente en la base con estado ACTIVO
+
+Vendedor -> VendedorController: crearVendedor
+
+VendedorController -> VendedorService: crearVendedor
+
+VendedorService -> VendedorService: validarEmail
+
+VendedorService -> VendedorRepository: obtenerVendedorByEmail
+
+VendedorRepository -> MongoDB: obtenerVendedorByEmail
+
+MongoDB -> VendedorRepository: <<vendedor encontrado>>
+
+VendedorRepository -> VendedorService: <<vendedor encontrado>>
+
+VendedorService -> VendedorService: validarEstadoVendedorActivo
+
+VendedorService -> VendedorController: <<VendedorExistenteException>>
+
+VendedorController -> Vendedor: <<El vendedor ya existe>>
+
+legend
+<b>ESCENARIO:</b> Registro con un correo existente y vendedor con estado ACTIVO
+
+<b>DADO</b> que el vendedor intenta registrarse con un correo que ya está en uso 
+y el vendedor asociado tiene estado ACTIVO 
+<b>CUANDO</b> confirma su alta en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error VendedorExistenteException y 
+el vendedor ve el mensaje "El vendedor ya existe"
+end legend
+
+@enduml

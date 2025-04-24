@@ -1,0 +1,39 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+activate UsuarioRepository
+database MongoDB
+
+title Modificar un usuario existente en la base
+
+Usuario -> UsuarioController: modificarUsuario
+
+UsuarioController -> UsuarioService: modificarUsuario
+
+UsuarioService -> UsuarioService: validarEmailNoVacio
+
+UsuarioService -> UsuarioRepository: obtenerUsuarioByEmail
+
+UsuarioRepository -> MongoDB: obtenerUsuarioByEmail
+
+MongoDB -> UsuarioRepository: <<usuario encontrado>>
+
+UsuarioRepository -> UsuarioService: <<usuario encontrado>>
+
+UsuarioService -> UsuarioService: validarUsuarioActivo
+
+UsuarioService -> UsuarioRepository: modificarUsuario
+
+UsuarioRepository -> MongoDB: modificarUsuario
+
+
+legend
+<b>ESCENARIO:</b> Modificacion de un usuario ACTIVO existente
+
+<b>COMO</b> usuario de Libre Mercado 
+<b>QUIERO</b> poder modificar los datos de mi usuario
+<b>PARA</b> poder tener actualizado mis datos en el sistema
+end legend
+
+@enduml

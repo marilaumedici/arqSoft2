@@ -1,0 +1,42 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+activate ProductoRepository
+database MongoDB
+
+title Un vendedor quiere eliminar un producto que ya tiene registrado
+
+Vendedor -> ProductoController: eliminarProducto
+
+ProductoController -> ProductoService: eliminarProducto
+
+ProductoService -> ProductoService: validarEmailVendedor
+
+ProductoService -> ProductoService: validaCodigoProductoIngresado
+
+ProductoService -> ProductoRepository: obtenerProductoByCodigo
+
+ProductoRepository -> MongoDB: obtenerProductoByCodigo
+
+MongoDB -> ProductoRepository: <<producto encontrado>>
+
+ProductoRepository -> ProductoService: <<producto encontrado>>
+
+ProductoService -> ProductoService: validaQueSeaDelMismoVendedor
+
+ProductoService -> ProductoService: poneProductoNoDisponible
+
+ProductoService -> ProductoRepository: actualizarProducto
+
+ProductoRepository -> MongoDB: actualizarProducto
+
+legend
+<b>ESCENARIO:</b> Vendedor elimina un producto que ya tiene registrado
+
+<b>COMO</b> vendedor de Libre Mercado 
+<b>QUIERO</b> poder eliminar un producto
+<b>PARA</b> que algun usuario de la aplicacion no compre algun producto que ya no tengo
+end legend
+
+@enduml

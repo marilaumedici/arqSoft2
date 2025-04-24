@@ -1,0 +1,37 @@
+@startuml
+actor Vendedor
+activate VendedorController
+activate VendedorService
+activate VendedorRepository
+database MongoDB
+
+title Modificar un vendedor inexistente
+
+Vendedor -> VendedorController: modificarVendedor
+
+VendedorController -> VendedorService: modificarVendedor
+
+VendedorService -> VendedorService: validarEmail
+
+VendedorService -> VendedorRepository: obtenerVendedorByEmail
+
+VendedorRepository -> MongoDB: obtenerVendedorByEmail
+
+MongoDB -> VendedorRepository: <<vendedor no encontrado>>
+
+VendedorRepository -> VendedorService: <<vendedor no encontrado>>
+
+VendedorService -> VendedorController: <<VendedorNoEncontradoException>>
+
+VendedorController -> Vendedor: <<No se encontro el vendedor>>
+
+legend
+<b>ESCENARIO:</b> Modificar vendedor inexistente
+
+<b>DADO</b> que el mail ingresado no esta asociado a ningun vendedor
+<b>CUANDO</b> confirma la modificacion  
+<b>ENTONCES</b> el sistema devolvera el error VendedorNoEncontradoException
+<b>Y</b> el vendedor vera el mensaje de error "No se encontro el vendedor"
+end legend
+
+@enduml

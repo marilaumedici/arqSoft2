@@ -1,0 +1,39 @@
+@startuml
+actor Vendedor
+activate VendedorController
+activate VendedorService
+activate VendedorRepository
+database MongoDB
+
+title Modificar un vendedor existente en la base
+
+Vendedor -> VendedorController: modificarVendedor
+
+VendedorController -> VendedorService: modificarVendedor
+
+VendedorService -> VendedorService: validarEmail
+
+VendedorService -> VendedorRepository: obtenerVendedorByEmail
+
+VendedorRepository -> MongoDB: obtenerVendedorByEmail
+
+MongoDB -> VendedorRepository: <<vendedor encontrado>>
+
+VendedorRepository -> VendedorService: <<vendedor encontrado>>
+
+VendedorService -> VendedorService: validarEstadoVendedorActivo
+
+VendedorService -> VendedorRepository: actualizarVendedor
+
+VendedorRepository -> MongoDB: actualizarVendedor
+
+
+legend
+<b>ESCENARIO:</b> Modificar vendedor ACTIVO
+
+<b>COMO</b> vendedor de Libre Mercado 
+<b>QUIERO</b> poder modificar mis datos
+<b>PARA</b> poder tener mis datos de contacto actualizados
+end legend
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+
+title Un vendedor crea un producto pero no pasa su email
+
+Vendedor -> ProductoController: crearProducto
+
+ProductoController -> ProductoService: crearProducto
+
+ProductoService -> ProductoService: validarEmailVendedor
+
+ProductoService -> ProductoController: <<InternalErrorException>>
+
+ProductoController -> Vendedor: <<El mail del vendedor no puede estar vacio>>
+
+legend
+<b>ESCENARIO:</b> Vendedor crea un producto que no esta en base
+
+<b>DADO</b> que el vendedor no pasa un mail de vendedor
+<b>CUANDO</b> confirma el alta en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error InternalErrorException
+<b>Y</b> el vendedor vera el mensaje de error "El mail del vendedor no puede estar vacio"
+end legend
+
+@enduml

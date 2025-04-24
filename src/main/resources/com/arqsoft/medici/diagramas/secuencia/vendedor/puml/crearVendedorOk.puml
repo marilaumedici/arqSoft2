@@ -1,0 +1,37 @@
+@startuml
+actor Vendedor
+activate VendedorController
+activate VendedorService
+activate VendedorRepository
+database MongoDB
+
+title Crear un vendedor inexistente en la base
+
+Vendedor -> VendedorController: crearVendedor
+
+VendedorController -> VendedorService: crearVendedor
+
+VendedorService -> VendedorService: validarEmail
+
+VendedorService -> VendedorRepository: obtenerVendedorByEmail
+
+VendedorRepository -> MongoDB: obtenerVendedorByEmail
+
+MongoDB -> VendedorRepository: <<vendedor no encontrado>>
+
+VendedorRepository -> VendedorService: <<vendedor no encontrado>>
+
+VendedorService -> VendedorRepository: crearVendedor
+
+VendedorRepository -> MongoDB: crearVendedor
+
+
+legend
+<b>ESCENARIO:</b> Registro con un correo inexistente
+
+<b>COMO</b> vendedor de Libre Mercado 
+<b>QUIERO</b> poder enrolarme a la aplicacion
+<b>PARA</b> poder vender articulos a los usuarios de la aplicacion
+end legend
+
+@enduml

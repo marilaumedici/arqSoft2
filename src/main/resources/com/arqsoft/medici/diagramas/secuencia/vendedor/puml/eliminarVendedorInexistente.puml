@@ -1,0 +1,38 @@
+@startuml
+actor Vendedor
+activate VendedorController
+activate VendedorService
+activate VendedorRepository
+database MongoDB
+
+title Eliminar un vendedor inexistente en la base
+
+Vendedor -> VendedorController: eliminarVendedor
+
+VendedorController -> VendedorService: eliminarVendedor
+
+VendedorService -> VendedorService: validarEmail
+
+VendedorService -> VendedorRepository: obtenerVendedorByEmail
+
+VendedorRepository -> MongoDB: obtenerVendedorByEmail
+
+MongoDB -> VendedorRepository: <<vendedor no encontrado>>
+
+VendedorRepository -> VendedorService: <<vendedor no encontrado>>
+
+VendedorService -> VendedorController: VendedorNoEncontradoException
+
+VendedorController -> Vendedor: <<No se encontro el vendedor>>
+
+legend
+<b>ESCENARIO:</b> Borrar un vendedor inexistente en la base
+
+
+<b>DADO</b> el mail no esta asociado a ningun vendedor en la base
+<b>CUANDO</b> confirma la eliminacion
+<b>ENTONCES</b> el sistema devolvera el error VendedorNoEncontradoException
+<b>Y</b> el usuario vera el mensaje de error "No se encontro el vendedor"
+end legend
+
+@enduml

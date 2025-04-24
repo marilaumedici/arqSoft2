@@ -1,0 +1,39 @@
+@startuml
+actor Vendedor
+activate VendedorController
+activate VendedorService
+activate VendedorRepository
+database MongoDB
+
+title Crear un vendedor existente en la base con estado BORRADO
+
+Vendedor -> VendedorController: crearVendedor
+
+VendedorController -> VendedorService: crearVendedor
+
+VendedorService -> VendedorService: validarEmail
+
+VendedorService -> VendedorRepository: obtenerVendedorByEmail
+
+VendedorRepository -> MongoDB: obtenerVendedorByEmail
+
+MongoDB -> VendedorRepository: <<vendedor encontrado>>
+
+VendedorRepository -> VendedorService: <<vendedor encontrado>>
+
+VendedorService -> VendedorService: validarEstadoVendedorBorrado
+
+VendedorService -> VendedorRepository: crearVendedor
+
+VendedorRepository -> MongoDB: crearVendedor
+
+
+legend
+<b>ESCENARIO:</b> Registro con un correo existente y vendedor con estado BORRADO
+
+<b>COMO</b> vendedor de Libre Mercado 
+<b>QUIERO</b> poder re enrolarme a la aplicacion
+<b>PARA</b> poder vender articulos a los usuarios de la aplicacion
+end legend
+
+@enduml

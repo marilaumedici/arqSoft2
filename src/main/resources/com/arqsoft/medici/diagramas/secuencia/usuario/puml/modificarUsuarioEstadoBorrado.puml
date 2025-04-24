@@ -1,0 +1,40 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+activate UsuarioRepository
+database MongoDB
+
+title Modificar un usuario existente en la base con estado BORRADO
+
+Usuario -> UsuarioController: modificarUsuario
+
+UsuarioController -> UsuarioService: modificarUsuario
+
+UsuarioService -> UsuarioService: validarEmailNoVacio
+
+UsuarioService -> UsuarioRepository: obtenerUsuarioByEmail
+
+UsuarioRepository -> MongoDB: obtenerUsuarioByEmail
+
+MongoDB -> UsuarioRepository: <<usuario encontrado>>
+
+UsuarioRepository -> UsuarioService: <<usuario encontrado>>
+
+UsuarioService -> UsuarioService: validarUsuarioBorrado
+
+UsuarioService -> UsuarioController: <<UsuarioNoEncontradoException>>
+
+UsuarioController -> Usuario: <<No se encontro el usuario>>
+
+
+
+legend
+<b>ESCENARIO:</b> Modificacion de usuario existente BORRADO
+
+<b>DADO</b> que el usuario intenta modificar sus datos pero tiene estado BORRADO 
+<b>CUANDO</b> confirma la modificacion 
+<b>ENTONCES</b> el sistema devolvera el error "No se encontro el usuario"
+end legend
+
+@enduml

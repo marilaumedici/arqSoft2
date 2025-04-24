@@ -1,0 +1,41 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+activate ProductoRepository
+database MongoDB
+
+title Un vendedor quiere modificar un producto de otro vendedor
+
+Vendedor -> ProductoController: modificarProducto
+
+ProductoController -> ProductoService: modificarProducto
+
+ProductoService -> ProductoService: validaCodigoProductoIngresado
+
+ProductoService -> ProductoService: validarEmailVendedor
+
+ProductoService -> ProductoRepository: obtenerProductoByCodigo
+
+ProductoRepository -> MongoDB: obtenerProductoByCodigo
+
+MongoDB -> ProductoRepository: <<producto encontrado>>
+
+ProductoRepository -> ProductoService: <<producto encontrado>>
+
+ProductoService -> ProductoService: validarEmailVendedorIngresadoMismoDelProducto
+
+ProductoService -> ProductoController: <<InternalErrorException>>
+
+ProductoController -> Vendedor: <<Un vendedor no puede modificar el producto de otro vendedor>>
+
+legend
+<b>ESCENARIO:</b> Vendedor modifica un producto de otro vendedor
+
+<b>DADO</b> que el mail vendedor del producto a modificar es diferente al mail vendedor ingresado
+<b>CUANDO</b> confirma la modificacion del producto en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error InternalErrorException
+<b>Y</b> el vendedor vera el mensaje de error "Un vendedor no puede modificar el producto de otro vendedor"
+end legend
+
+@enduml

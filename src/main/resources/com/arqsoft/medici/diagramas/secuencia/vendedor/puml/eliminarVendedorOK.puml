@@ -1,0 +1,39 @@
+@startuml
+actor Vendedor
+activate VendedorController
+activate VendedorService
+activate VendedorRepository
+database MongoDB
+
+title Eliminar un vendedor existente en la base
+
+Vendedor -> VendedorController: eliminarVendedor
+
+VendedorController -> VendedorService: eliminarVendedor
+
+VendedorService -> VendedorService: validarEmail
+
+VendedorService -> VendedorRepository: obtenerVendedorByEmail
+
+VendedorRepository -> MongoDB: obtenerVendedorByEmail
+
+MongoDB -> VendedorRepository: <<vendedor encontrado>>
+
+VendedorRepository -> VendedorService: <<vendedor encontrado>>
+
+VendedorService -> VendedorService: ponerVendedorEstadoBorrado
+
+VendedorService -> VendedorRepository: actualizarVendedor
+
+VendedorRepository -> MongoDB: actualizarVendedor
+
+
+legend
+<b>ESCENARIO:</b> Borrar un vendedor existente en la base
+
+<b>COMO</b> vendedor de Libre Mercado 
+<b>QUIERO</b> poder borrar mi usuario de la aplicacion
+<b>PARA</b> que ya no se pueda transaccionar desde mi cuenta
+end legend
+
+@enduml

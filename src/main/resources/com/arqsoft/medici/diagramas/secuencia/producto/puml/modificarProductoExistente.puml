@@ -1,0 +1,44 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+activate ProductoRepository
+database MongoDB
+
+title Un vendedor quiere modificar un producto que ya tiene registrado
+
+Vendedor -> ProductoController: modificarProducto
+
+ProductoController -> ProductoService: modificarProducto
+
+ProductoService -> ProductoService: validaCodigoProductoIngresado
+
+ProductoService -> ProductoService: validarEmailVendedor
+
+ProductoService -> ProductoRepository: obtenerProductoByCodigo
+
+ProductoRepository -> MongoDB: obtenerProductoByCodigo
+
+MongoDB -> ProductoRepository: <<producto encontrado>>
+
+ProductoRepository -> ProductoService: <<producto encontrado>>
+
+ProductoService -> ProductoRepository: actualizarProducto
+
+ProductoRepository -> MongoDB: actualizarProducto
+
+MongoDB -> ProductoRepository: <<producto actualizado>>
+
+ProductoRepository -> ProductoService: <<producto actualizado>>
+
+ProductoService -> ProductoController: <<producto actualizado>>
+
+legend
+<b>ESCENARIO:</b> Vendedor modifica un producto que ya tiene registrado
+
+<b>COMO</b> vendedor de Libre Mercado 
+<b>QUIERO</b> poder actualizar los datos de un producto
+<b>PARA</b> que algun usuario de la aplicacion pueda visualizar los datos actualizados del producto
+end legend
+
+@enduml

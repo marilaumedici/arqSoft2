@@ -1,0 +1,38 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+activate UsuarioRepository
+database MongoDB
+
+title Modificar un usuario inexistente en la base
+
+Usuario -> UsuarioController: modificarUsuario
+
+UsuarioController -> UsuarioService: modificarUsuario
+
+UsuarioService -> UsuarioService: validarEmailNoVacio
+
+UsuarioService -> UsuarioRepository: obtenerUsuarioByEmail
+
+UsuarioRepository -> MongoDB: obtenerUsuarioByEmail
+
+MongoDB -> UsuarioRepository: <<usuario no encontrado>>
+
+UsuarioRepository -> UsuarioService: <<usuario no encontrado>>
+
+UsuarioService -> UsuarioController: <<UsuarioNoEncontradoException>>
+
+UsuarioController -> Usuario: <<No se encontro el usuario>>
+
+
+
+legend
+<b>ESCENARIO:</b> Modificacion de usuario inexistente
+
+<b>DADO</b> que el email no esta asociado a ningun usuario en la base
+<b>CUANDO</b> confirma la modificacion 
+<b>ENTONCES</b> el sistema devolvera el error "No se encontro el usuario"
+end legend
+
+@enduml

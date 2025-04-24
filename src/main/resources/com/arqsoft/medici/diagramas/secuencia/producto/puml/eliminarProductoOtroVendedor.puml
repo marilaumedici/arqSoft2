@@ -1,0 +1,41 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+activate ProductoRepository
+database MongoDB
+
+title Un vendedor quiere eliminar un producto que no le pertenece
+
+Vendedor -> ProductoController: eliminarProducto
+
+ProductoController -> ProductoService: eliminarProducto
+
+ProductoService -> ProductoService: validarEmailVendedor
+
+ProductoService -> ProductoService: validaCodigoProductoIngresado
+
+ProductoService -> ProductoRepository: obtenerProductoByCodigo
+
+ProductoRepository -> MongoDB: obtenerProductoByCodigo
+
+MongoDB -> ProductoRepository: <<producto encontrado>>
+
+ProductoRepository -> ProductoService: <<producto encontrado>>
+
+ProductoService -> ProductoService: validaQueSeaDelMismoVendedor
+
+ProductoService -> ProductoController: <<InternalErrorException>>
+
+ProductoController -> Vendedor: <<Un vendedor no puede eliminar el producto de otro vendedor>>
+
+legend
+<b>ESCENARIO:</b> Vendedor trata de eliminar un producto que no le pertenece
+
+<b>DADO</b> que un vendedor trata de eliminar un producto que no le pertenece
+<b>CUANDO</b> confirma la eliminacion en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error InternalErrorException
+<b>Y</b> el vendedor vera el mensaje de error "Un vendedor no puede eliminar el producto de otro vendedor"
+end legend
+
+@enduml

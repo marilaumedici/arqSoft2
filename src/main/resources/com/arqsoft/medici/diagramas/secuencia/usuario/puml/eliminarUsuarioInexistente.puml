@@ -1,0 +1,38 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+activate UsuarioRepository
+database MongoDB
+
+title Eliminar un usuario inxistente en la base
+
+Usuario -> UsuarioController: eliminarUsuario
+
+UsuarioController -> UsuarioService: eliminarUsuario
+
+UsuarioService -> UsuarioService: validarEmail
+
+UsuarioService -> UsuarioRepository: obtenerUsuarioByEmail
+
+UsuarioRepository -> MongoDB: obtenerUsuarioByEmail
+
+MongoDB -> UsuarioRepository: <<usuario no encontrado>>
+
+UsuarioRepository -> UsuarioService: <<usuario no encontrado>>
+
+UsuarioService -> UsuarioController: <<UsuarioNoEncontradoException>>
+
+UsuarioController -> Usuario: <<No se encontro el usuario>>
+
+
+legend
+<b>ESCENARIO:</b> Borrado logico de un usuario inexistente
+
+<b>DADO</b> que el mail no tiene un usuario asociado en la base
+<b>CUANDO</b> confirma su eliminacion
+<b>ENTONCES</b> el sistema devolvera el error "No se encontro el usuario"
+
+end legend
+
+@enduml

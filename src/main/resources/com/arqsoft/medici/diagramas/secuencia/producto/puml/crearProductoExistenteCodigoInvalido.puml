@@ -1,0 +1,39 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+activate ProductoRepository
+database MongoDB
+
+title Un vendedor quiere actualizar un producto que no esta en base
+
+Vendedor -> ProductoController: crearProducto
+
+ProductoController -> ProductoService: crearProducto
+
+ProductoService -> ProductoService: validarEmailVendedor
+
+ProductoService -> ProductoService: validaCodigoProductoIngresado
+
+ProductoService -> ProductoRepository: obtenerProductoByCodigo
+
+ProductoRepository -> MongoDB: obtenerProductoByCodigo
+
+MongoDB -> ProductoRepository: <<producto no encontrado>>
+
+ProductoRepository -> ProductoService: <<producto no encontrado>>
+
+ProductoService -> ProductoController: <<ProductoInexistenteException>>
+
+ProductoController -> Vendedor: <<Hubo un error, por favor vuelva a probar mas adelante>>
+
+legend
+<b>ESCENARIO:</b> Vendedor crea un producto que no esta en base
+
+<b>DADO</b> que el vendedor pasa un codigo de producto que no existe
+<b>CUANDO</b> confirma el alta en el sistema  
+<b>ENTONCES</b> el sistema devolvera el error ProductoInexistenteException
+<b>Y</b> el vendedor vera el mensaje de error "Hubo un error, por favor vuelva a probar mas adelante"
+end legend
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+activate UsuarioRepository
+database MongoDB
+
+title Crear un usuario existente con estado BORRADO en la base
+
+Usuario -> UsuarioController: crearUsuario
+
+UsuarioController -> UsuarioService: crearUsuario
+
+UsuarioService -> UsuarioService: validarEmail
+
+UsuarioService -> UsuarioRepository: obtenerUsuarioByEmail
+
+UsuarioRepository -> MongoDB: obtenerUsuarioByEmail
+
+MongoDB -> UsuarioRepository: <<usuario encontrado>>
+
+UsuarioRepository -> UsuarioService: <<usuario encontrado>>
+
+UsuarioService -> UsuarioService: validaEstadoUsuarioEsBorrado
+
+UsuarioService -> UsuarioService: poneEnEstadoActivoAlUsuario
+
+UsuarioService -> UsuarioRepository: actualizaUsuario
+
+UsuarioRepository -> MongoDB: actualizaUsuario
+
+
+legend
+<b>ESCENARIO:</b> Registro con un correo existente pero el usuario tiene estado BORRADO
+
+<b>DADO</b> que el usuario intenta registrarse con un correo que ya está en uso 
+pero el usuario asociado tiene estado BORRADO 
+<b>CUANDO</b> confirma su alta en el sistema  
+<b>ENTONCES</b> el usuario podrá registrarse y pasará a tener estado ACTIVO
+end legend
+
+@enduml

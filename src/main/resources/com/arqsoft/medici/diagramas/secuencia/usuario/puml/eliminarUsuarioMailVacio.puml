@@ -1,0 +1,28 @@
+@startuml
+actor Usuario
+activate UsuarioController
+activate UsuarioService
+
+title Eliminar un usuario sin pasar un mail
+
+Usuario -> UsuarioController: eliminarUsuario
+
+UsuarioController -> UsuarioService: eliminarUsuario
+
+UsuarioService -> UsuarioService: validarEmail
+
+UsuarioService -> UsuarioController: <<InternalErrorException>>
+
+UsuarioController -> Usuario: <<El mail no debe viajar vacio>>
+
+
+legend
+<b>ESCENARIO:</b> Borrado logico de un usuario sin pasar un mail
+
+<b>DADO</b> que no se pasa un mail al servicio
+<b>CUANDO</b> confirma su eliminacion
+<b>ENTONCES</b> el sistema devolvera el error "El mail no debe viajar vacio"
+
+end legend
+
+@enduml

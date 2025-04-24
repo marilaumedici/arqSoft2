@@ -1,0 +1,44 @@
+@startuml
+actor Vendedor
+activate ProductoController
+activate ProductoService
+activate VendedorService
+activate ProductoRepository
+database MongoDB
+
+title Un vendedor crea un nuevo producto en la base
+
+Vendedor -> ProductoController: crearProducto
+
+ProductoController -> ProductoService: crearProducto
+
+ProductoService -> ProductoService: validarEmailVendedor
+
+ProductoService -> ProductoService: validaCodigoProductoEstaVacio
+
+ProductoService -> ProductoService: validaDatosProductoIngresados
+
+ProductoService -> VendedorService: obtenerVendedorByEmail
+
+VendedorService -> ProductoService: <<vendedor  encontrado>>
+
+ProductoService -> ProductoRepository: crearProducto
+
+ProductoRepository -> MongoDB: crearProducto
+
+MongoDB -> ProductoRepository: <<producto creado>>
+
+ProductoRepository -> ProductoService: <<producto creado>>
+
+ProductoService -> ProductoController: <<producto creado>>
+
+
+legend
+<b>ESCENARIO:</b> Vendedor crea un nuevo producto
+
+<b>COMO</b> vendedor de Libre Mercado 
+<b>QUIERO</b> poder crear un producto
+<b>PARA</b> que algun usuario de la aplicacion pueda comprar de manera online lo que vendo
+end legend
+
+@enduml
