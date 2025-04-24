@@ -126,11 +126,12 @@ public class VendedorServiceImpl implements VendedorService {
 		dto.setEstado(vendedor.getEstado());
 		dto.setMail(vendedor.getMail());
 		dto.setRazonSocial(vendedor.getRazonSocial());
+		/*
 		for(Producto p : vendedor.getProductosListados()) {
 	    	ProductoResponseDTO pDTO = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
 			dto.getProductosListados().add(pDTO);
 		}
-		
+		*/
 		return dto;
 	}
 

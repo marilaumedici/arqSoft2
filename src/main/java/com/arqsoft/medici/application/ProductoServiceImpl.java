@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,8 +83,8 @@ public class ProductoServiceImpl implements ProductoService {
 			
 			Producto p = productoRepository.insert(producto);
 			
-			vendedor.getProductosListados().add(producto);
-			vendedorService.actualizarVendedor(vendedor);
+			//vendedor.getProductosListados().add(producto);
+			//vendedorService.actualizarVendedor(vendedor);
 			
 			response = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
 
@@ -214,6 +215,14 @@ public class ProductoServiceImpl implements ProductoService {
 		
 		//Solo hay que traer productos disponibles para su compra
 	    criteriosAnd.add(Criteria.where("estado").is(ProductoEstado.DISPONIBLE));
+	    
+	    List<String> vendedoresActivosIds = mongoTemplate.find(
+	            new Query(Criteria.where("estado").is(VendedorEstado.ACTIVO)),
+	            Vendedor.class
+	        ).stream().map(Vendedor::getMail).collect(Collectors.toList());
+
+	     criteriosAnd.add(Criteria.where("vendedor.$id").in(vendedoresActivosIds));
+
 		
 	    //Filtra por precio
 		if (request.getPrecioMinimo() != null && request.getPrecioMaximo() != null) {
