@@ -58,7 +58,8 @@ public class ProductoServiceTest {
 	private String mailVendedor1 = "naturisteros@gmail.com";
 	private String razonSoacialVendedor1 = "Tienda naturista Naturisteros";
 
-
+	private String mailVendedor2 = "juarezconfor@gmail.com";
+	private String razonSoacialVendedor2 = "Juarez Confort";
 	
 	@Test
 	public void testCrearProductoInexistenteOK() throws InternalErrorException, VendedorNoEncontradoException {
@@ -156,6 +157,56 @@ public class ProductoServiceTest {
 	    assertEquals(stockP1_nuevo, capturado.getStock());
 	    assertEquals(mailVendedor1, capturado.getVendedor().getMail());
 		
+		
+	}
+	
+
+	@Test
+	public void testModificarProductoExistenteDiferenteVendedor() {
+		
+		Producto producto = new Producto(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS);
+		Vendedor vendedor = new Vendedor(mailVendedor1, razonSoacialVendedor1);
+		producto.setVendedor(vendedor);
+		Optional<Producto> productoOpcional = Optional.of(producto); 
+		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
+
+		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor2);
+		assertThrows(InternalErrorException.class, () -> {  productoService.modificarProducto(request); });
+
+		verify(productoRepository, times(1)).findById(codigoP1);
+		
+	}
+	
+	@Test
+	public void testModificarProductoInexistente() {
+		
+		Optional<Producto> productoOpcional = Optional.empty(); 
+		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
+
+		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor1);
+		assertThrows(ProductoInexistenteException.class, () -> {  productoService.modificarProducto(request); });
+
+		verify(productoRepository, times(1)).findById(codigoP1);
+		
+	}
+	
+	@Test
+	public void testModificarProductoMailVendedorVacio() {
+		
+
+		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, "");
+		assertThrows(InternalErrorException.class, () -> {  productoService.modificarProducto(request); });
+
+		
+	}
+	
+	@Test
+	public void testModificarProductoMailCodigoProductoVacio() {
+		
+
+		ProductoDTO request = new ProductoDTO("", nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor1);
+		assertThrows(InternalErrorException.class, () -> {  productoService.modificarProducto(request); });
+
 		
 	}
 	
