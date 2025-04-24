@@ -49,11 +49,11 @@ public class ProductoControllerImpl implements ProductoController {
     }
     
 	@Override
-	public void modificarProducto(String id, ProductoDTO request) {
+	public void modificarProducto(ProductoDTO request) {
     	
     	try {
     		
-			productoService.modificarProducto(id,request);
+			productoService.modificarProducto(request);
 			
 		} catch (InternalErrorException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

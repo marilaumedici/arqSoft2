@@ -26,11 +26,11 @@ public interface ProductoController {
     @ApiOperation(nickname = "crear_producto", value = "Crea un producto")
 	public ProductoResponseDTO crearProducto(@RequestBody ProductoDTO request);
     
-    @PutMapping(path = "/{productoId}", 
+    @PutMapping(path = "/", 
     consumes = MediaType.APPLICATION_JSON_VALUE, 
     produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(nickname = "modificar_producto", value = "Modifica los datos de un producto")
-	public void modificarProducto(@PathVariable(value = "productoId") String id, @RequestBody ProductoDTO request);
+	public void modificarProducto(@RequestBody ProductoDTO request);
     
     @DeleteMapping(path = "/{productoId}/{mailVendedor}", 
     produces = MediaType.APPLICATION_JSON_VALUE)

@@ -2,6 +2,7 @@ package com.arqsoft.medici.application;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,6 +20,7 @@ import com.arqsoft.medici.domain.Vendedor;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
+import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.utils.ProductoCategoria;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
 import com.arqsoft.medici.infrastructure.persistence.ProductoRepository;;
@@ -45,7 +47,13 @@ public class ProductoServiceTest {
 	private int stockP1 = 35;
 	private String codigoP1 = "12334454356";
 	
+	private String nombreP1_nuevo = "Pistachos 350gm";
+	private String descripcionP1_nuevo = "Bolsita de pistachos tostados y salados 400gm";
+	private double precioP1_nuevo = 13000;
+	private int stockP1_nuevo = 50;
+	
 	private ProductoCategoria ALIMENTOS = ProductoCategoria.ALIMENTOS;
+	private ProductoCategoria CONGELADOS = ProductoCategoria.CONGELADOS;
 	
 	private String mailVendedor1 = "naturisteros@gmail.com";
 	private String razonSoacialVendedor1 = "Tienda naturista Naturisteros";
@@ -106,6 +114,48 @@ public class ProductoServiceTest {
 	    assertEquals(precioP1, capturado.getPrecio());
 	    assertEquals(stockP1, capturado.getStock());
 	    assertEquals(mailVendedor1, capturado.getVendedor().getMail());
+		
+	}
+	
+	@Test
+	public void testCrearProductoInexistenteConCodigo() {
+		
+		Optional<Producto> productoOpcional = Optional.empty(); 
+		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
+
+		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS, mailVendedor1);
+		assertThrows(ProductoInexistenteException.class, () -> {  productoService.crearProducto(request); });
+		
+	}
+	
+	@Test
+	public void testModificarProductoExistenteOk() {
+		
+		Producto producto = new Producto(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS);
+		Vendedor vendedor = new Vendedor(mailVendedor1, razonSoacialVendedor1);
+		producto.setVendedor(vendedor);
+		Optional<Producto> productoOpcional = Optional.of(producto); 
+		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
+
+		when(productoRepository.save(any(Producto.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, CONGELADOS, mailVendedor1);
+		assertDoesNotThrow(() -> { productoService.modificarProducto(request); });
+		
+		verify(productoRepository, times(1)).findById(codigoP1);
+		verify(productoRepository, times(1)).save(any(Producto.class));
+		verify(productoRepository).save(productoCaptor.capture());
+		
+		Producto capturado = productoCaptor.getValue();
+
+	    assertEquals(nombreP1_nuevo, capturado.getNombre());
+	    assertEquals(descripcionP1_nuevo, capturado.getDescripcion());
+	    assertEquals(CONGELADOS, capturado.getCategoria());
+	    assertEquals(ProductoEstado.DISPONIBLE, capturado.getEstado());
+	    assertEquals(precioP1_nuevo, capturado.getPrecio());
+	    assertEquals(stockP1_nuevo, capturado.getStock());
+	    assertEquals(mailVendedor1, capturado.getVendedor().getMail());
+		
 		
 	}
 	

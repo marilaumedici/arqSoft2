@@ -14,7 +14,7 @@ public interface ProductoService {
 	
 	public ProductoResponseDTO crearProducto(ProductoDTO request) throws InternalErrorException, VendedorNoEncontradoException, ValidacionException, ProductoInexistenteException;
 
-	public void modificarProducto(String id, ProductoDTO request) throws InternalErrorException, ProductoInexistenteException;
+	public void modificarProducto(ProductoDTO request) throws InternalErrorException, ProductoInexistenteException;
 
 	public void eliminarProducto(String id, String mail) throws InternalErrorException, ProductoInexistenteException;
 	

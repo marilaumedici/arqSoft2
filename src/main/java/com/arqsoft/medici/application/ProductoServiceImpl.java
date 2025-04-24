@@ -89,9 +89,9 @@ public class ProductoServiceImpl implements ProductoService {
 	}
 	
 	@Override
-	public void modificarProducto(String id, ProductoDTO request) throws InternalErrorException, ProductoInexistenteException {
+	public void modificarProducto(ProductoDTO request) throws InternalErrorException, ProductoInexistenteException {
 		
-		if(StringUtils.isBlank(id)) {
+		if(StringUtils.isBlank(request.getCodigoProducto())) {
 			throw new InternalErrorException("El id del producto no puede estar vacio.");
 			
 		}
@@ -100,7 +100,7 @@ public class ProductoServiceImpl implements ProductoService {
 			
 		}
 		
-		Optional<Producto> opcionalProducto = productoRepository.findById(id);
+		Optional<Producto> opcionalProducto = productoRepository.findById(request.getCodigoProducto());
 		
 		if(existeProducto(opcionalProducto)) {
 			
