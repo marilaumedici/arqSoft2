@@ -61,11 +61,6 @@ public class ProductoServiceImpl implements ProductoService {
 			}
 			
 			Producto producto = opcionalProducto.get();
-			
-			if(producto.getEstado().equals(ProductoEstado.NO_DISPONIBLE)) {
-				producto.setEstado(ProductoEstado.DISPONIBLE);
-				
-			}
 						
 			if(actualizarDatosProducto(request, producto)) {
 				Producto p = productoRepository.save(producto);
@@ -277,8 +272,7 @@ public class ProductoServiceImpl implements ProductoService {
 	private boolean existeProducto(Optional<Producto> opcionalProducto) {
 		
 		return opcionalProducto.isPresent() && 
-			   opcionalProducto.get().getEstado().equals(ProductoEstado.DISPONIBLE) &&
-			   opcionalProducto.get().getVendedor().getEstado().equals(VendedorEstado.ACTIVO);
+			   opcionalProducto.get().getEstado().equals(ProductoEstado.DISPONIBLE);
 		
 	}
 	
@@ -295,6 +289,11 @@ public class ProductoServiceImpl implements ProductoService {
 		validarProductoMismoVendedor(producto.getVendedor().getMail(), request.getMailVendedor(), "Un vendedor no puede modificar el producto de otro vendedor.");
 
 		boolean cambio = false;
+		
+		if(producto.getEstado().equals(ProductoEstado.NO_DISPONIBLE)) {
+			producto.setEstado(ProductoEstado.DISPONIBLE);
+			cambio = true;
+		}
 		
 		if(StringUtils.isNotBlank(request.getNombre())) {
 			producto.setNombre(request.getNombre());
@@ -316,7 +315,7 @@ public class ProductoServiceImpl implements ProductoService {
 			producto.setStock(request.getStock());
 			cambio = true;
 		}
-		if(StringUtils.isNotBlank(String.valueOf(request.getCategoria()))) {
+		if(request.getCategoria() != null) {
 			producto.setCategoria(request.getCategoria());
 			cambio = true;
 		}
@@ -341,7 +340,7 @@ public class ProductoServiceImpl implements ProductoService {
 			throw new ValidacionException("Debe ingresar un stock inicial para el producto.");
 			
 		}
-		if(StringUtils.isBlank(String.valueOf(request.getCategoria()))) {
+		if(request.getCategoria() != null) {
 			throw new ValidacionException("Debe ingresar una categoria para el producto.");
 			
 		}
