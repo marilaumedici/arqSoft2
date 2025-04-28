@@ -1,0 +1,52 @@
+@startuml
+actor Usuario
+activate VentaController
+activate VentaService
+activate UsuarioService
+activate ProductoService
+activate VentaRepository
+database MongoDB
+
+title Procesa una venta de un producto
+
+Usuario -> VentaController: procesarVenta
+
+VentaController -> VentaService: procesarVenta
+
+VentaService -> VentaService: validarEmailCompradorNoVacio
+
+VentaService -> VentaService: validarIdProductoNoVacio
+
+VentaService -> UsuarioService: obtenerUsuarioByMail
+
+UsuarioService -> VentaService: <<usuario encontrado>>
+
+VentaService -> ProductoService: obtenerProductoByCodigo
+
+ProductoService -> VentaService: <<producto encontrado>>
+
+VentaService -> VentaService: obtieneVendedorDelProducto
+
+VentaService -> ProductoService: descontarStock
+
+VentaService -> VentaRepository: crearVenta
+
+VentaRepository -> MongoDB: crearVenta
+
+
+legend
+<b>ESCENARIO:</b> Generar una venta
+<b>PRECONDICION:</b> El vendedor esta ACTIVO
+
+<b>COMO</b> usuario de Libre Mercado 
+<b>QUIERO</b> poder realizar la compra de un producto
+<b>PARA</b> poder adquirir un producto
+end legend
+
+
+
+
+
+
+
+

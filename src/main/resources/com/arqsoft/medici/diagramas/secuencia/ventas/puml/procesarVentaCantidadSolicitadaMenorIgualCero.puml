@@ -1,0 +1,55 @@
+@startuml
+actor Usuario
+activate VentaController
+activate VentaService
+activate UsuarioService
+activate ProductoService
+
+
+title Procesa una venta de un producto pero el stock no es suficiente
+
+Usuario -> VentaController: procesarVenta
+
+VentaController -> VentaService: procesarVenta
+
+VentaService -> VentaService: validarEmailCompradorNoVacio
+
+VentaService -> VentaService: validarIdProductoNoVacio
+
+VentaService -> UsuarioService: obtenerUsuarioByMail
+
+UsuarioService -> VentaService: <<usuario encontrado>>
+
+VentaService -> ProductoService: obtenerProductoByCodigo
+
+ProductoService -> VentaService: <<producto encontrado>>
+
+VentaService -> VentaService: obtieneVendedorDelProducto
+
+VentaService -> ProductoService: descontarStock
+
+ProductoService -> VentaService: <<ValidacionException>>
+
+VentaService -> VentaController: <<ValidacionException>>
+
+VentaController -> Usuario: <<La cantidad ingresada debe ser mayor o igual a 1>>
+
+
+
+legend
+<b>ESCENARIO:</b> Generar una venta
+<b>PRECONDICION:</b> El vendedor esta ACTIVO
+
+<b>DADO</b> que el usuario ingreso una cantidad menor igual a 0
+<b>CUANDO</b> confirma la compra en el sistema
+<b>ENTONCES</b> el sistema devolvera el error ValidacionException
+<b>Y</b> el usuario vera el mensaje de error "La cantidad ingresada debe ser mayor o igual a 1"
+end legend
+
+
+
+
+
+
+
+

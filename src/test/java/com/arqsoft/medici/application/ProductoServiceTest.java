@@ -2,6 +2,7 @@ package com.arqsoft.medici.application;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -23,8 +24,13 @@ import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.utils.ProductoCategoria;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
-import com.arqsoft.medici.infrastructure.persistence.ProductoRepository;;
-
+import com.arqsoft.medici.infrastructure.persistence.ProductoRepository;
+import com.arqsoft.medici.infrastructure.persistence.puertos.ProductoDAO;
+import com.arqsoft.medici.domain.dto.FiltroBuscadorProducto;
+import java.util.List;
+import java.util.ArrayList;
+import com.arqsoft.medici.domain.dto.ProductosPaginado;
+import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductoServiceTest {
@@ -41,6 +47,10 @@ public class ProductoServiceTest {
 	@Captor
 	private ArgumentCaptor<Producto> productoCaptor;
 	
+	@Mock
+	private ProductoDAO productoDAO;
+	
+	
 	private String nombreP1 = "Pistachos 400gm";
 	private String descripcionP1 = "Bolsa de pistachos tostados y salados 400gm";
 	private double precioP1 = 14000;
@@ -54,12 +64,32 @@ public class ProductoServiceTest {
 	
 	private ProductoCategoria ALIMENTOS = ProductoCategoria.ALIMENTOS;
 	private ProductoCategoria CONGELADOS = ProductoCategoria.CONGELADOS;
+	private ProductoCategoria TECNOLOGIA = ProductoCategoria.TECNOLOGIA;
+
 	
 	private String mailVendedor1 = "naturisteros@gmail.com";
 	private String razonSoacialVendedor1 = "Tienda naturista Naturisteros";
 
 	private String mailVendedor2 = "juarezconfor@gmail.com";
 	private String razonSoacialVendedor2 = "Juarez Confort";
+	
+	private String nombreP2 = "Microondas BGH";
+	private String descripcionP2 = "Es un microondas grande";
+	private double precioP2 = 200000;
+	private int stockP2 = 40;
+	private String codigoP2 = "12334454357";
+	
+	private String nombreP3 = "Heladera Patrick gris";
+	private String descripcionP3 = "Es una healdera patrick gris medianita";
+	private double precioP3 = 400000;
+	private int stockP3 = 20;
+	private String codigoP3 = "12334454358";
+	
+	private String nombreP4 = "Lavasecarropas longive blanco";
+	private String descripcionP4 = "Es un lavasecarropas genial";
+	private double precioP4 = 350000;
+	private int stockP4 = 60;
+	private String codigoP4 = "12334454359";
 	
 	@Test
 	public void testCrearProductoInexistenteOK() throws InternalErrorException, VendedorNoEncontradoException {
@@ -277,6 +307,141 @@ public class ProductoServiceTest {
 
 		verify(productoRepository, times(1)).findById(codigoP1);
 		
+	}
+	
+	
+	@Test
+	public void testBuscarTodosProductosSinFiltro() {
+		
+		List<Producto> productos = new ArrayList<Producto>();
+		
+		Producto producto = new Producto(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS);
+		Vendedor vendedor = new Vendedor(mailVendedor1, razonSoacialVendedor1);
+		producto.setVendedor(vendedor);
+		
+		Producto producto2 = new Producto(codigoP2, nombreP2, descripcionP2, precioP2, stockP2, TECNOLOGIA);
+		Vendedor vendedor2 = new Vendedor(mailVendedor2, razonSoacialVendedor2);
+		producto2.setVendedor(vendedor2);
+		
+		Producto producto3 = new Producto(codigoP3, nombreP3, descripcionP3, precioP3, stockP3, TECNOLOGIA);
+		producto3.setVendedor(vendedor2);
+		
+		Producto producto4 = new Producto(codigoP4, nombreP4, descripcionP4, precioP4, stockP4, TECNOLOGIA);
+		producto4.setVendedor(vendedor2);
+		
+		productos.add(producto4);
+		productos.add(producto3);
+		productos.add(producto2);
+		productos.add(producto);
+
+		ProductosPaginado pagina =  new ProductosPaginado(productos, 0, 4, 1);
+		
+		FiltroBuscadorProducto dto = new FiltroBuscadorProducto();
+		when(productoDAO.buscarProductos(dto)).thenReturn(pagina);
+
+		
+		assertDoesNotThrow(() -> {
+			
+			ProductosVendedorDTO response = productoService.obtenerProductosFiltrados(dto);
+			assertNotNull(response.getProductos());
+		    assertEquals(response.getProductos().size(), 4);
+		    assertEquals(response.getPaginaActual(), 0);
+		    assertEquals(response.getTotalResultados(), 4);
+
+		});
+
+	}
+	
+	
+	@Test
+	public void testBuscarTodosProductosFiltraCategoria() {
+		
+		List<Producto> productos = new ArrayList<Producto>();
+		
+		Producto producto = new Producto(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS);
+		Vendedor vendedor = new Vendedor(mailVendedor1, razonSoacialVendedor1);
+		producto.setVendedor(vendedor);
+		
+		Producto producto2 = new Producto(codigoP2, nombreP2, descripcionP2, precioP2, stockP2, TECNOLOGIA);
+		Vendedor vendedor2 = new Vendedor(mailVendedor2, razonSoacialVendedor2);
+		producto2.setVendedor(vendedor2);
+		
+		Producto producto3 = new Producto(codigoP3, nombreP3, descripcionP3, precioP3, stockP3, TECNOLOGIA);
+		producto3.setVendedor(vendedor2);
+		
+		Producto producto4 = new Producto(codigoP4, nombreP4, descripcionP4, precioP4, stockP4, TECNOLOGIA);
+		producto4.setVendedor(vendedor2);
+		
+		productos.add(producto4);
+		productos.add(producto3);
+		productos.add(producto2);
+		//productos.add(producto);
+
+		ProductosPaginado pagina =  new ProductosPaginado(productos, 0, 3, 1);
+		
+		FiltroBuscadorProducto dto = new FiltroBuscadorProducto();
+		dto.setCategoria(TECNOLOGIA);
+		when(productoDAO.buscarProductos(dto)).thenReturn(pagina);
+
+		
+		assertDoesNotThrow(() -> {
+			
+			ProductosVendedorDTO response = productoService.obtenerProductosFiltrados(dto);
+			assertNotNull(response.getProductos());
+		    assertEquals(response.getProductos().size(), 3);
+		    assertEquals(response.getPaginaActual(), 0);
+		    assertEquals(response.getTotalResultados(), 3);
+		    assertEquals(response.getProductos().get(0).getCategoria(), TECNOLOGIA);
+		    assertEquals(response.getProductos().get(1).getCategoria(), TECNOLOGIA);
+		    assertEquals(response.getProductos().get(2).getCategoria(), TECNOLOGIA);
+
+
+		});
+
+	}
+	
+	@Test
+	public void testBuscarTodosProductosFiltradoPrecio() {
+		
+		List<Producto> productos = new ArrayList<Producto>();
+		
+		Producto producto = new Producto(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS);
+		Vendedor vendedor = new Vendedor(mailVendedor1, razonSoacialVendedor1);
+		producto.setVendedor(vendedor);
+		
+		Producto producto2 = new Producto(codigoP2, nombreP2, descripcionP2, precioP2, stockP2, TECNOLOGIA);
+		Vendedor vendedor2 = new Vendedor(mailVendedor2, razonSoacialVendedor2);
+		producto2.setVendedor(vendedor2);
+		
+		Producto producto3 = new Producto(codigoP3, nombreP3, descripcionP3, precioP3, stockP3, TECNOLOGIA);
+		producto3.setVendedor(vendedor2);
+		
+		Producto producto4 = new Producto(codigoP4, nombreP4, descripcionP4, precioP4, stockP4, TECNOLOGIA);
+		producto4.setVendedor(vendedor2);
+		
+		//productos.add(producto4);
+		//productos.add(producto3);
+		productos.add(producto2);
+		productos.add(producto);
+
+		ProductosPaginado pagina =  new ProductosPaginado(productos, 0, 2, 1);
+		
+		FiltroBuscadorProducto dto = new FiltroBuscadorProducto();
+		dto.setPrecioMinimo(10000);
+		dto.setPrecioMaximo(300000);
+		when(productoDAO.buscarProductos(dto)).thenReturn(pagina);
+
+		
+		assertDoesNotThrow(() -> {
+			
+			ProductosVendedorDTO response = productoService.obtenerProductosFiltrados(dto);
+			assertNotNull(response.getProductos());
+		    assertEquals(response.getProductos().size(), 2);
+		    assertEquals(response.getPaginaActual(), 0);
+		    assertEquals(response.getTotalResultados(), 2);
+
+		});
+
 	}
 	
 	public ArgumentCaptor<Producto> getProductoCaptor() {

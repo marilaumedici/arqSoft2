@@ -1,0 +1,55 @@
+@startuml
+actor Usuario
+activate VentaController
+activate VentaService
+activate UsuarioService
+activate ProductoService
+activate VentaRepository
+database MongoDB
+
+title Procesa una venta de un producto que queda sin stock
+
+Usuario -> VentaController: procesarVenta
+
+VentaController -> VentaService: procesarVenta
+
+VentaService -> VentaService: validarEmailCompradorNoVacio
+
+VentaService -> VentaService: validarIdProductoNoVacio
+
+VentaService -> UsuarioService: obtenerUsuarioByMail
+
+UsuarioService -> VentaService: <<usuario encontrado>>
+
+VentaService -> ProductoService: obtenerProductoByCodigo
+
+ProductoService -> VentaService: <<producto encontrado>>
+
+VentaService -> VentaService: obtieneVendedorDelProducto
+
+VentaService -> ProductoService: descontarStock
+
+ProductoService -> ProductoService: actualizarProductoNoDisponible
+
+VentaService -> VentaRepository: crearVenta
+
+VentaRepository -> MongoDB: crearVenta
+
+
+legend
+<b>ESCENARIO:</b> Generar una venta
+<b>PRECONDICION:</b> El vendedor esta ACTIVO
+
+<b>DADO</b> que el usuario va a comprar toda la cantidad del producto
+<b>CUANDO</b> confirma la compra en el sistema 
+<b>ENTONCES</b> se realizaraa la compra
+<b>Y</b> el producto quedara en estado NO DISPONIBLE
+end legend
+
+
+
+
+
+
+
+

@@ -3,15 +3,27 @@ package com.arqsoft.medici.domain.dto;
 import com.arqsoft.medici.domain.utils.ProductoCategoria;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel(description="Datos del producto creado o modificado.")
 public class ProductoResponseDTO {
 	
+	@ApiModelProperty(value = "Codigo del producto.", example="680985584a846b45ce0494d7")
 	private String codigoProducto;
+	@ApiModelProperty(value = "Nombre del producto")
 	private String nombre;
+	@ApiModelProperty(value = "Descripcion del producto")
 	private String descripcion;
+	@ApiModelProperty(value = "Precio del producto con 2 decimales", example = "23000.00")
 	private double precio;
+	@ApiModelProperty(value = "Cantidad disponible para compra del producto", example = "230")
 	private int stock;
+	@ApiModelProperty(value = "Categoria del producto")
 	private ProductoCategoria categoria;
+	@ApiModelProperty(value = "Email del vendedor propietario del producto")
 	private String mailVendedor;
+	@ApiModelProperty(value = "Estado del producto")
 	private ProductoEstado estado;
 	
 	

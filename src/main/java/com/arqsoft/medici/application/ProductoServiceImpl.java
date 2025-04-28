@@ -1,11 +1,8 @@
 package com.arqsoft.medici.application;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Producto;
@@ -13,21 +10,20 @@ import com.arqsoft.medici.domain.Vendedor;
 import com.arqsoft.medici.domain.dto.FiltroBuscadorProducto;
 import com.arqsoft.medici.domain.dto.ProductoDTO;
 import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
+import com.arqsoft.medici.domain.dto.ProductosPaginado;
 import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
-import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.persistence.ProductoRepository;
+import com.arqsoft.medici.infrastructure.persistence.puertos.ProductoDAO;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.MongoTemplate;
+
 
 @Service
 public class ProductoServiceImpl implements ProductoService {
@@ -36,7 +32,8 @@ public class ProductoServiceImpl implements ProductoService {
 	private ProductoRepository productoRepository;
 	
 	@Autowired
-	private MongoTemplate mongoTemplate;
+	private ProductoDAO productoDAO;
+	//private MongoTemplate mongoTemplate;
 	
 	@Autowired
 	private VendedorService vendedorService;
@@ -204,54 +201,9 @@ public class ProductoServiceImpl implements ProductoService {
 	@Override
 	public ProductosVendedorDTO obtenerProductosFiltrados(FiltroBuscadorProducto request) {
 
-		PageRequest pageRequest = PageRequest.of(request.getPagina(), request.getSize());
+		ProductosPaginado  productos = productoDAO.buscarProductos(request);
 		
-		List<Criteria> criteriosAnd = new ArrayList<>();
-		
-		//Solo hay que traer productos disponibles para su compra
-	    criteriosAnd.add(Criteria.where("estado").is(ProductoEstado.DISPONIBLE));
-	    
-	    List<String> vendedoresActivosIds = mongoTemplate.find(
-	            new Query(Criteria.where("estado").is(VendedorEstado.ACTIVO)),
-	            Vendedor.class
-	        ).stream().map(Vendedor::getMail).collect(Collectors.toList());
-
-	     criteriosAnd.add(Criteria.where("vendedor.$id").in(vendedoresActivosIds));
-
-		
-	    //Filtra por precio
-		if (request.getPrecioMinimo() != null && request.getPrecioMaximo() != null) {
-		    criteriosAnd.add(Criteria.where("precio").gte(request.getPrecioMinimo()).lte(request.getPrecioMaximo()));
-		} else if (request.getPrecioMinimo() != null) {
-		    criteriosAnd.add(Criteria.where("precio").gte(request.getPrecioMinimo()));
-		} else if (request.getPrecioMaximo() != null) {
-		    criteriosAnd.add(Criteria.where("precio").lte(request.getPrecioMaximo()));
-		}
-
-		//Filtra por categoria
-		if (request.getCategoria() != null) {
-		    criteriosAnd.add(Criteria.where("categoria").is(request.getCategoria()));
-		}
-
-		//Filtra por una descripcion del producto
-		if (StringUtils.isNotBlank(request.getDescripcion())) {
-		    String regex = ".*" + Pattern.quote(request.getDescripcion().trim()) + ".*";
-		    Criteria nombreCriteria      = Criteria.where("nombre").regex(regex, "i");
-		    Criteria descripcionCriteria = Criteria.where("descripcion").regex(regex, "i");
-
-		    Criteria orCriterio = new Criteria().orOperator(nombreCriteria, descripcionCriteria);
-		    criteriosAnd.add(orCriterio);
-		}
-
-		Criteria finalCriteria = new Criteria().andOperator(criteriosAnd.toArray(new Criteria[0]));
-		Query query = new Query(finalCriteria).with(pageRequest);
-
-		List<Producto> productos = mongoTemplate.find(query, Producto.class);
-		
-		long totalElementos = mongoTemplate.count(Query.of(query).limit(-1).skip(-1), Producto.class);
-		int totalPaginas = (int) Math.ceil((double) totalElementos / request.getSize());
-
-		ProductosVendedorDTO response = productoEntityToDTO(productos, request.getPagina(), totalPaginas, totalElementos);
+		ProductosVendedorDTO response = productoEntityToDTO(productos.getProductos(), productos.getPagina(), productos.getTotalPaginas(), productos.getTotalElementos());
 		
 		return response;
 	}
@@ -373,13 +325,21 @@ public class ProductoServiceImpl implements ProductoService {
 	public void setVendedorService(VendedorService vendedorService) {
 		this.vendedorService = vendedorService;
 	}
-
+/*
 	public MongoTemplate getMongoTemplate() {
 		return mongoTemplate;
 	}
 
 	public void setMongoTemplate(MongoTemplate mongoTemplate) {
 		this.mongoTemplate = mongoTemplate;
+	}
+*/
+	public ProductoDAO getProductoDAO() {
+		return productoDAO;
+	}
+
+	public void setProductoDAO(ProductoDAO productoDAO) {
+		this.productoDAO = productoDAO;
 	}
 
 }

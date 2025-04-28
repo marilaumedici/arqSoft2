@@ -48,12 +48,13 @@ public class VentaServiceImpl  implements VentaService {
 		
 		Vendedor vendedor = producto.getVendedor();
 		
+		productoService.descontarStock(producto, request.getCantidad());
+		
 		Venta venta = new Venta(request.getProductoId(), vendedor.getMail(), request.getMailComprador(), new Date(),
 				producto.getPrecio(), producto.getPrecio() * request.getCantidad(), request.getCantidad());
 		
 		ventaRepository.insert(venta);
 		
-		productoService.descontarStock(producto, request.getCantidad());
 		
 	}
 
