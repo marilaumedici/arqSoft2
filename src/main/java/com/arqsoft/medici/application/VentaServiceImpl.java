@@ -1,5 +1,7 @@
 package com.arqsoft.medici.application;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ public class VentaServiceImpl  implements VentaService {
 	
 	@Autowired
 	private UsuarioService usuarioService;
+	
+	private ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
 
 	@Override
 	public void procesarVenta(RegistrarVentaDTO request) throws InternalErrorException, ValidacionException, ProductoInexistenteException, UsuarioNoEncontradoException {
@@ -50,7 +54,9 @@ public class VentaServiceImpl  implements VentaService {
 		
 		productoService.descontarStock(producto, request.getCantidad());
 		
-		Venta venta = new Venta(request.getProductoId(), vendedor.getMail(), request.getMailComprador(), new Date(),
+		Date date = Date.from(zonedDateTime.toInstant());
+		
+		Venta venta = new Venta(request.getProductoId(), vendedor.getMail(), request.getMailComprador(), date,
 				producto.getPrecio(), producto.getPrecio() * request.getCantidad(), request.getCantidad());
 		
 		ventaRepository.insert(venta);
@@ -88,6 +94,14 @@ public class VentaServiceImpl  implements VentaService {
 
 	public void setUsuarioService(UsuarioService usuarioService) {
 		this.usuarioService = usuarioService;
+	}
+
+	public ZonedDateTime getZonedDateTime() {
+		return zonedDateTime;
+	}
+
+	public void setZonedDateTime(ZonedDateTime zonedDateTime) {
+		this.zonedDateTime = zonedDateTime;
 	}
 
 
